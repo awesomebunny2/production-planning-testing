@@ -1,0 +1,407 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <title>Weekly Production Planning Excel Add-In</title>
+
+    <!--<script src="Scripts/jquery-3.6.0.js" type="text/javascript"></script>-->
+    <script src="Scripts/MessageBanner.js" type="text/javascript"></script>
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js" type="text/javascript"></script>
+
+
+
+    <link rel="stylesheet" href="./tabulator_bulma.css" type="text/css" />
+
+    <link href="https://code.jquery.com/ui/1.10.4/themes/ui-lightness/jquery-ui.css"
+          rel="stylesheet">
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/9.6.0/css/fabric.min.css">
+
+    <link href="Home.css" rel="stylesheet" type="text/css" />
+    <link href="../Content/Button.css" rel="stylesheet" type="text/css" />
+    <link href="../Content/MessageBanner.css" rel="stylesheet" type="text/css" />
+
+
+
+
+    <!--<link href="./jquery-ui.css" rel="stylesheet">-->
+    <!--<script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/5.4.4/js/tabulator.min.js" integrity="sha512-BGo9xGWI32ZfTMp/ueR3fZKO5nYkPbt3uwMWr+w8w3e72H8A0sTQGO+iqRADwIT0eJkFP1HDgSC82gA4sTuQ6w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>-->
+
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" type="text/javascript"></script>
+    <!--<script src="https://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>-->
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/5.4.4/js/tabulator.min.js" integrity="sha512-BGo9xGWI32ZfTMp/ueR3fZKO5nYkPbt3uwMWr+w8w3e72H8A0sTQGO+iqRADwIT0eJkFP1HDgSC82gA4sTuQ6w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+
+
+
+
+
+
+    <!-- For Office UI Fabric Core, go to https://aka.ms/office-ui-fabric to learn more. -->
+
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+
+    <!-- To enable the offline use of Office UI Fabric Core, use: -->
+    <!-- link rel="stylesheet" href="Content/fabric.min.css" -->
+</head>
+
+    <!-- Office UI Fabric JS and it's components are no longer actively supported. Please see https://aka.ms/PnP-OfficeFabricReact for recommended Patterns and Practices -->
+    <!-- <link rel="stylesheet" href="https://appsforoffice.microsoft.com/fabric/2.1.0/fabric.components.min.css"> -->
+
+<body class="ms-Fabric" dir="ltr">
+
+    <div id="header" class="zoom-title">
+
+        <div id="main-title-head" class="title-head">
+            <div id="title-head">
+                <!-- <i id="title-left-arrow" value="back" class="fa-solid fa-chevron-left title-arrow"></i> -->
+                <img id="heading-logo" src="./Images/logo-filled.png" alt="Welcome" title="Welcome" />
+                <span id="page-title" class="underline">PRESS SCHEDULING</span>
+                <!-- <i id="title-right-arrow" value="forward" class="fa-solid fa-chevron-right title-arrow"></i> -->
+            </div>
+        </div>
+
+
+        <!-- <div id="title-dots" class="nav-dots"> -->
+        <!-- dots go here -->
+        <!-- <i page="home" class="fa-solid fa-circle fa-2xs dots title-dots dot-selected"></i>
+            <i page="press-scheduling" class="fa-solid fa-circle fa-2xs dots title-dots"></i>
+        </div> -->
+
+    </div>
+
+
+
+    <!-- <div id="home-page">
+
+        <header class="ms-welcome__header ms-bgColor-neutralLighter">
+            <img width="90" height="90" src="./Images/logo-filled.png" alt="Welcome" title="Welcome" />
+            <h1 class="ms-font-su">Welcome</h1>
+        </header>
+
+        <main id="app-body" class="ms-welcome__main" style="display: none;"> -->
+    <!-- <h2 class="ms-font-xl"> Discover what Office Add-ins can do for you today! </h2>
+    <ul class="ms-List ms-welcome__features">
+        <li class="ms-ListItem">
+            <i class="ms-Icon ms-Icon--Ribbon ms-font-xl"></i>
+            <span class="ms-font-m">Achieve more with Office integration</span>
+        </li>
+        <li class="ms-ListItem">
+            <i class="ms-Icon ms-Icon--Unlock ms-font-xl"></i>
+            <span class="ms-font-m">Unlock features and functionality</span>
+        </li>
+        <li class="ms-ListItem">
+            <i class="ms-Icon ms-Icon--Design ms-font-xl"></i>
+            <span class="ms-font-m">Create and visualize like a pro</span>
+        </li>
+    </ul> -->
+    <!-- <p class="ms-font-l">Modify the source files, then click <b>Populate Forms</b>.</p> -->
+    <!-- <div role="button" id="populate-forms" class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl">
+        <span class="ms-Button-label">Populate Forms</span>
+    </div> -->
+    <!-- <div id="populate-button" class="btns">
+        <div class="text-box">
+            <a id="populate-forms" href="#" class="btn btn-purple btn-animate">Populate Forms</a>
+        </div>
+    </div> -->
+    <!-- <div role="button" id="remove-breakout-sheets" class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl">
+        <span class="ms-Button-label">Delete Breakout Sheets</span>
+    </div> -->
+    <!-- <div role="button" id="clear-forms" class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl">
+        <span class="ms-Button-label">Clear Forms</span>
+    </div> -->
+    <!-- <div role="button" id="breakout" class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl">
+        <span class="ms-Button-label">Breakout</span>
+    </div> -->
+    <!-- <div id="breakout-button" class="btns">
+        <div class="text-box">
+            <a id="breakout" href="#" class="btn btn-blue btn-animate">Breakout</a>
+        </div>
+    </div> -->
+    <!-- <p id="version">Version 0.2.0 - Created by Matt Calvert</p> -->
+    <!-- </main>
+
+    </div> -->
+
+    <div id="welcome-page">
+
+        <header class="welcome-header ms-bgColor-neutralLighter">
+            <img width="90" height="90" src="./Images/logo-filled.png" alt="Welcome" title="Welcome" />
+            <h1 class="ms-font-su center welcome-pad">Weekly Production Planning</h1>
+            <hr>
+            <div id="sub-text">
+                <h2 class="ms-font-xl">If you are seeing this screen, then there is no form data logged to enable Press Scheduling.</h2>
+                <p class="ms-font-l">To get started, please paste in your info to the proper areas and click <b>Populate Forms</b>.</p>
+            </div>
+            <hr>
+        </header>
+
+        <div id="cover-image">
+            <img id="cover" src="./Images/cover-image.jpeg">
+        </div>
+
+        <!-- <main id="app-body" class="ms-welcome__main">
+            <h2 class="ms-font-xl">If you are seeing this screen, then there is no form data logged to enable Press Scheduling.</h2>
+            <p class="ms-font-l">To get started, please paste in your info to the proper areas and click <b>Populate Forms</b>.</p> -->
+        <!-- <ul class="ms-List ms-welcome__features marge">
+            <li class="ms-ListItem">
+                <i class="ms-Icon ms-Icon--ReadingMode ms-font-xl"></i>
+                <span class="ms-font-m tiny">E2R data is parsed and autofilled into the empty columns to the right on each E2R sheet</span>
+            </li>
+            <li class="ms-ListItem">
+                <i class="ms-Icon ms-Icon--Unlock ms-font-xl"></i>
+                <span class="ms-font-m tiny">The UJID from the master sheet is matched against the UID in each of the E2Rs and returns the form number for the matched value to each item in the master sheet</span>
+            </li>
+            <li class="ms-ListItem">
+                <i class="ms-Icon ms-Icon--Design ms-font-xl"></i>
+                <span class="ms-font-m tiny">A press scheduling area will populate over this welcome page filled with each form from the E2Rs, which will allow the user to assing presses and weekdays to each form in the group</span>
+            </li>
+        </ul>
+        <p class="ms-font-l">After info is populated, here is what happens when you click <b>Breakout</b>:</p>
+        <ul class="ms-List ms-welcome__features marge">
+            <li class="ms-ListItem">
+                <i class="ms-Icon ms-Icon--Ribbon ms-font-xl"></i>
+                <span class="ms-font-m tiny">Sheets will be created for each product type, with each one containing all row info from the Master sheet that has a type in the Type column that matches the associated breakout sheet</span>
+            </li>
+            <li class="ms-ListItem">
+                <i class="ms-Icon ms-Icon--Unlock ms-font-xl"></i>
+                <span class="ms-font-m tiny">If an item is missing a type in the master sheet, the user will be alerted to update or accept an override before continuing to create breakout sheets</span>
+            </li>
+            <li class="ms-ListItem">
+                <i class="ms-Icon ms-Icon--Design ms-font-xl"></i>
+                <span class="ms-font-m tiny">Missing items will be called out in their own sheet for the user to review if needed</span>
+            </li>
+        </ul> -->
+        <!-- </main> -->
+
+    </div>
+
+
+
+
+    <div id="select-tables" class="zoom">
+
+        <div id="silk-table" class="assign-values btm-space">
+
+            <h4 class="silk-head">SILK</h4>
+
+            <div class="border-box silk-border">
+                <div id="silk-form" class="fill-out"></div>
+            </div>
+
+        </div>
+
+        <div id="text-table" class="assign-values btm-space">
+
+            <h4 class="text-head">TEXT</h4>
+
+            <div class="border-box text-border">
+                <div id="text-form" class="fill-out">
+                </div>
+            </div>
+
+        </div>
+
+        <div id="digital-table" class="assign-values btm-space">
+
+            <h4 class="dig-head">DIGITAL</h4>
+
+            <div class="border-box dig-border">
+                <div id="dig-form" class="fill-out">
+                </div>
+            </div>
+
+        </div>
+
+        <!-- <div role="button" id="clearall" class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl"> -->
+        <div id="clearall">
+            <span id="clearall-butt" role="button" class="small-butt">Clear All Data</span>
+        </div>
+
+    </div>
+
+
+
+    <div id="week-tables" class="assign-values to-top stat-table-area zoom">
+
+        <div id="handle" class="ui-resizable-handle ui-resizable-n">
+            <i class="fa-solid fa-grip-lines"></i>
+        </div>
+
+        <div id="scroll-this" class="unselectable">
+
+            <div id="week-table-head" class="dow-head">
+                <div id="head-title">
+                    <i id="dow-left-arrow" value="back" class="fa-solid fa-chevron-left dow-arrow"></i>
+                    <span id="week-title" class="underline">MONDAY</span>
+                    <i id="dow-right-arrow" value="forward" class="fa-solid fa-chevron-right dow-arrow"></i>
+                </div>
+            </div>
+
+            <div id="dow-dots" class="nav-dots" style="margin-bottom: 15px">
+                <!-- dots go here -->
+                <i weekday="monday" class="fa-solid fa-circle fa-2xs dots week-dots dot-selected"></i>
+                <i weekday="tuesday" class="fa-solid fa-circle fa-2xs dots week-dots"></i>
+                <i weekday="wednesday" class="fa-solid fa-circle fa-2xs dots week-dots"></i>
+                <i weekday="thursday" class="fa-solid fa-circle fa-2xs dots week-dots"></i>
+                <i weekday="friday" class="fa-solid fa-circle fa-2xs dots week-dots"></i>
+            </div>
+
+            <!-- <p>BREAK</p>
+            <p>BREAK</p>
+            <p>BREAK</p>
+            <p>BREAK</p>
+            <p>BREAK</p>
+            <p>BREAK</p>
+            <p>BREAK</p>
+            <p>BREAK</p>
+            <p>BREAK</p>
+            <p>BREAK</p> -->
+
+            <div id="html-tables">
+
+                <div id="monday-static" class="current-week show-table">
+                    <div id="monday-form" class="fill-out">
+                        <table>
+                        </table>
+                    </div>
+
+                </div>
+
+                <div id="tuesday-static" class="current-week">
+                    <div id="tuesday-form" class="fill-out">
+                        <table>
+                        </table>
+                    </div>
+
+                </div>
+
+                <div id="wednesday-static" class="current-week">
+                    <div id="wednesday-form" class="fill-out">
+                        <table>
+                        </table>
+                    </div>
+
+                </div>
+
+                <div id="thursday-static" class="current-week">
+                    <div id="thursday-form" class="fill-out">
+                        <table>
+                        </table>
+                    </div>
+
+                </div>
+
+                <div id="friday-static" class="current-week">
+                    <div id="friday-form" class="fill-out">
+                        <table>
+                        </table>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+        </div>
+
+    </div>
+
+
+
+
+
+
+    <div id="reset-background" class="background">
+
+        <div id="reset-warning" class="warning">
+            <h1>WARNING</h1>
+            <p>By clicking "Reset", you will remove all changes made to the document, including all press scheduling data and any changes made to the master sheet and/or breakout sheets. Are you sure you want to do this?</p>
+            <div id="reset-buttons" class="two-buttons">
+                <button id="reset-forms" class="alt-btn">Reset</button>
+                <button id="no" class="alt-btn">Cancel</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="empty-background" class="background">
+
+        <div id="empty-warning" class="warning">
+            <h1>WARNING</h1>
+            <!-- <p>The Master sheet contains records that have empty cells in the "Type" column. These cells are preventing the breakout sheets from being created. Below is a list of the UJID for each row causing this issue:</p> -->
+            <p>Empty cells in "Type" column prevent breakout sheets. UJID list below:</p>
+            <p id="empty-ujid"></p>
+            <!-- <p>You may either set all these records to "IGNORE" and continue generating the breakout sheets, or if you would like to manually set these records to a specific line type, click the "Handle Manually" button to exit this function and update these lines traditionally.</p> -->
+            <p>Set all records to "All Other" to continue, or click "Handle Manually" to update.</p>
+            <div id="empty-buttons" class="two-stacked-buttons">
+                <button id="set-to-ignore" class="alt-btn">All Other Override</button>
+                <button id="handle-manually" class="alt-btn">Handle Manually</button>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div id="loading-background" class="background">
+
+        <div id="loading-section" class="warning">
+            <h1 id="loading-head">Creating Breakout Tables</h1>
+            <p>This should only take a few moments...</p>
+            <!-- <div id="reset-buttons" class="two-buttons">
+                <button id="reset-forms" class="btn">Reset</button>
+                <button id="no" class="btn">Cancel</button>
+            </div> -->
+        </div>
+
+    </div>
+
+
+
+
+    <div id="footer">
+        <!-- <div class="text-box">
+            <a id="create-press-table-btn" href="#" class="btn btn-green btn-animate">Refresh Pivot Table</a>
+        </div> -->
+        <div class="text-box">
+            <a id="populate-forms" href="#" class="btn btn-purple btn-animate">Populate Forms</a>
+        </div>
+        <div class="text-box">
+            <a id="breakout" href="#" class="btn btn-blue btn-animate">Breakout</a>
+        </div>
+    </div>
+
+    <!-- <div id="populate-button" class="btns">
+        <div class="text-box">
+            <a id="populate-forms" href="#" class="btn btn-purple btn-animate">Populate Forms</a>
+        </div>
+    </div>
+
+    <div id="breakout-button" class="btns">
+        <div class="text-box">
+            <a id="breakout" href="#" class="btn btn-blue btn-animate">Breakout</a>
+        </div>
+    </div> -->
+
+    <div id="absolute-bottom">
+        <p id="version">Version 1.3.0 - Created by Matt Calvert</p>
+    </div>
+
+
+
+    <script src="Home.js" type="text/javascript"></script>
+
+
+</body>
+</html>
