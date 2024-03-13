@@ -29,7 +29,7 @@ body {
     left: 0px;
     display: flex;
     flex-direction: column;
-    font-family: 'Inter', sans-serif;
+    font-family: 'Inter', sans-serif !important;
     font-size: 22px;
     align-items: center;
 }
