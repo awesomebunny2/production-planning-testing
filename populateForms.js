@@ -32,57 +32,57 @@ import { breakout } from "./breakout.js";
                 await Excel.run(async (context) => { //loads context so I can directly pull and write info to Excel within this async function
 
                     //===============================================================================================================================
-                        //#region assigns sheet variables ------------------------------------------------------------------------------------------
+                        //#region ASSIGNS SHEET VARIABLES --------------------------------------------------------------------------------------------
 
                             //load in worksheets
-                            // const range = context.workbook.getselectedrange(); //selected range; left over from inital example
-                            const validation = context.workbook.worksheets.getitem("validation");
-                            const customformstable = validation.tables.getitem("customforms").load("name");
-                            const linestable = validation.tables.getitem("lines");
-                            const linesbodyrange = linestable.getdatabodyrange().load("values");
-                            const linesheaderrange = linestable.getheaderrowrange().load("values");
-                            const silke2rsheet = context.workbook.worksheets.getitem("silke2r").load("name");
-                            const texte2rsheet = context.workbook.worksheets.getitem("texte2r").load("name");
-                            const dige2rsheet = context.workbook.worksheets.getitem("dige2r").load("name");
-                            const mastersheet = context.workbook.worksheets.getitem("master").load("name");
+                            // const range = context.workbook.getSelectedRange(); //selected range; left over from inital example
+                            const validation = context.workbook.worksheets.getItem("Validation");
+                            const customFormsTable = validation.tables.getItem("CustomForms").load("name");
+                            const linesTable = validation.tables.getItem("Lines");
+                            const linesBodyRange = linesTable.getDataBodyRange().load("values");
+                            const linesHeaderRange = linesTable.getHeaderRowRange().load("values");
+                            const silkE2RSheet = context.workbook.worksheets.getItem("SilkE2R").load("name");
+                            const textE2RSheet = context.workbook.worksheets.getItem("TextE2R").load("name");
+                            const digE2RSheet = context.workbook.worksheets.getItem("DIGE2R").load("name");
+                            const masterSheet = context.workbook.worksheets.getItem("Master").load("name");
 
                             //load in tables
-                            const sheetsperhourtable = validation.tables.getitem("sheetsperhour");
-                            const wastetable = validation.tables.getitem("waste");
-                            const productstable = validation.tables.getitem("products");
-                            const appareltable = validation.tables.getitem("appareltable");
-                            // const pressschedulinginfo = validation.tables.getitem("pressschedulinginfo");
-                            const silke2rtable = silke2rsheet.tables.getitem("silke2r");
-                            const texte2rtable = texte2rsheet.tables.getitem("texte2r");
-                            const dige2rtable = dige2rsheet.tables.getitem("dige2r");
-                            const mastertable = mastersheet.tables.getitem("master");
-                            const defaulttoignoretable = validation.tables.getitem("defaulttoignore");
+                            const sheetsPerHourTable = validation.tables.getItem("SheetsPerHour");
+                            const wasteTable = validation.tables.getItem("Waste");
+                            const productsTable = validation.tables.getItem("Products");
+                            const apparelTable = validation.tables.getItem("ApparelTable");
+                            // const pressSchedulingInfo = validation.tables.getItem("PressSchedulingInfo");
+                            const silkE2RTable = silkE2RSheet.tables.getItem("SilkE2R");
+                            const textE2RTable = textE2RSheet.tables.getItem("TextE2R");
+                            const digE2RTable = digE2RSheet.tables.getItem("DIGE2R");
+                            const masterTable = masterSheet.tables.getItem("Master");
+                            const defaultToIgnoreTable = validation.tables.getItem("DefaultToIgnore");
 
 
                             //loads the data body range of the tables above
-                            const sheethourbodyrange = sheetsperhourtable.getdatabodyrange().load("values");
-                            const customformsbodyrange = customformstable.getdatabodyrange().load("values");
-                            const wastebodyrange = wastetable.getdatabodyrange().load("values");
-                            const productsbodyrange = productstable.getdatabodyrange().load("values");
-                            const apparelbodyrange = appareltable.getdatabodyrange().load("values");
-                            const silke2rbodyrange = silke2rtable.getdatabodyrange().load("values");
-                            const texte2rbodyrange = texte2rtable.getdatabodyrange().load("values");
-                            const dige2rbodyrange = dige2rtable.getdatabodyrange().load("values");
-                            const masterbodyrange = mastertable.getdatabodyrange().load("values");
-                            const defaulttoignorebodyrange = defaulttoignoretable.getdatabodyrange().load("values");
+                            const sheetHourBodyRange = sheetsPerHourTable.getDataBodyRange().load("values");
+                            const customFormsBodyRange = customFormsTable.getDataBodyRange().load("values");
+                            const wasteBodyRange = wasteTable.getDataBodyRange().load("values");
+                            const productsBodyRange = productsTable.getDataBodyRange().load("values");
+                            const apparelBodyRange = apparelTable.getDataBodyRange().load("values");
+                            const silkE2RBodyRange = silkE2RTable.getDataBodyRange().load("values");
+                            const textE2RBodyRange = textE2RTable.getDataBodyRange().load("values");
+                            const digE2RBodyRange = digE2RTable.getDataBodyRange().load("values");
+                            const masterBodyRange = masterTable.getDataBodyRange().load("values");
+                            const defaultToIgnoreBodyRange = defaultToIgnoreTable.getDataBodyRange().load("values");
 
 
                             //loads the headers of the validation tables
-                            const sheethourheaderrange = sheetsperhourtable.getheaderrowrange().load("values");
-                            const wasteheaderrange = wastetable.getheaderrowrange().load("values");
-                            const productsheaderrange = productstable.getheaderrowrange().load("values");
-                            const masterheaderrange = mastertable.getheaderrowrange().load("values");
+                            const sheetHourHeaderRange = sheetsPerHourTable.getHeaderRowRange().load("values");
+                            const wasteHeaderRange = wasteTable.getHeaderRowRange().load("values");
+                            const productsHeaderRange = productsTable.getHeaderRowRange().load("values");
+                            const masterHeaderRange = masterTable.getHeaderRowRange().load("values");
 
                             //loads the row items for specific tables
-                            const silke2rtablerows = silke2rtable.rows.load("items");
-                            const texte2rtablerows = texte2rtable.rows.load("items");
-                            const dige2rtablerows = dige2rtable.rows.load("items");
-                            const mastertablerows = mastertable.rows.load("items");
+                            const silkE2RTableRows = silkE2RTable.rows.load("items");
+                            const textE2RTableRows = textE2RTable.rows.load("items");
+                            const digE2RTableRows = digE2RTable.rows.load("items");
+                            const masterTableRows = masterTable.rows.load("items");
 
                         //#endregion ----------------------------------------------------------------------------------------------------------------
                     //================================================================================================================================
