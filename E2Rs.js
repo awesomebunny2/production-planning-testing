@@ -3,6 +3,21 @@ import { deactivateEvents, activateEvents, conditionalFormatting, refreshPivotTa
 import { buildTabulatorTables, organizeData } from "./tabulatorTables.js";
 import { updateDataFromTable } from "./pressSchedulingInfo.js";
 
+// ===================================================================================================================================================
+    //#region Between Form Number Logic --------------------------------------------------------------------------------------------------------------
+    /**
+     * Determines if the form number is in range of min and max.
+     * @param {Number} min The beginning of the form range
+     * @param {Number} max The end of the form range
+     * @param {Number} test Current form number
+     * @returns {Boolean} True/False
+     */
+        function isBetween(min, max, test){
+            return Number(test) > min && Number(test) < max;
+        }
+    //#endregion -------------------------------------------------------------------------------------------------------------------------------------
+// ===================================================================================================================================================
+
 //====================================================================================================================================================
     //#region UPDATE E2RS FROM TASKPANE TABULATOR DATA -----------------------------------------------------------------------------------------------
 
@@ -354,11 +369,11 @@ import { updateDataFromTable } from "./pressSchedulingInfo.js";
 
                                         let waste = 0;
 
-                                        //if the worksheet's name is TextE2R, we need to offset the forms by 50, so we turn form into a number and add
-                                        //50 to the result. Also defining the waste amount for non-digital text and silk products
+                                        //if the worksheet's name is TextE2R, we need to offset the forms by 100, so we turn form into a number and add
+                                        //100 to the result. Also defining the waste amount for non-digital text and silk products
                                         if (worksheet.name == "TextE2R") {
 
-                                            form = Number(form) + 50; //augment form by 50
+                                            form = Number(form) + 100; //augment form by 100
                                             waste = globalVar.wasteData["Text"]["Waste"]; //text waste
 
                                         } else if (worksheet.name == "SilkE2R") {
@@ -367,41 +382,41 @@ import { updateDataFromTable } from "./pressSchedulingInfo.js";
 
                                         } else if (worksheet.name == "DIGE2R") {
 
-                                            if (Number(form) > 100 && Number(form) < 150) { //digital text
-
-                                                waste = globalVar.wasteData["Digital Text"]["Waste"];
-
-                                            } else if (Number(form) > 150 && Number(form) < 200) { //digital silk
+                                            if (isBetween(200,251,form)) { //digital silk
 
                                                 waste = globalVar.wasteData["Digital Silk"]["Waste"];
 
-                                            } else if (Number(form) > 200 && Number(form) < 250) { //digital husky
+                                            } else if (isBetween(250,301,form)) { //digital text
 
                                                 waste = globalVar.wasteData["Digital Text"]["Waste"];
 
-                                            } else if (Number(form) > 300 && Number(form) < 350) { //envelope windows
+                                            } else if (isBetween(300, 351, form)) { //digital husky
 
                                                 waste = globalVar.wasteData["Digital Text"]["Waste"];
 
-                                            } else if (Number(form) > 350 && Number(form) < 400) { //envelope no windows
+                                            } else if (isBetween(400, 451, form)) { //envelope windows
 
                                                 waste = globalVar.wasteData["Digital Text"]["Waste"];
 
-                                            } else if (Number(form) > 400 && Number(form) < 500) { //wide format tubes
+                                            } else if (isBetween(450, 501, form)) { //envelope no windows
+
+                                                waste = globalVar.wasteData["Digital Text"]["Waste"];
+
+                                            } else if (isBetween(500, 601, form)) { //wide format tubes
 
                                                 waste = globalVar.wasteData["Wide Format"]["Waste"];
 
-                                            } else if (Number(form) > 500 && Number(form) < 550) { //digital variable silk
+                                            } else if (isBetween(600, 651, form)) { //digital variable silk
 
                                                 waste = globalVar.wasteData["Digital Silk"]["Waste"];
 
-                                            } else if (Number(form) > 550 && Number(form) < 600) { //digital variable text
+                                            } else if (isBetween(650, 701, form)) { //digital variable text
 
                                                 waste = globalVar.wasteData["Digital Text"]["Waste"];
 
                                             };
 
-                                        };
+                                        }
 
                                     //#endregion -----------------------------------------------------------------------------------------------------
                                 //====================================================================================================================
