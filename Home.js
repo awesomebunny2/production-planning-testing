@@ -42,6 +42,10 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
 
                         globalVar.scrollErr = document.querySelector("#select-tables");
 
+                        document.getElementById("hide-missing").addEventListener("click", function(){
+                            location.reload();
+                        })
+
                         document.getElementById("populate-forms").onclick = populateForms;
                         document.getElementById("breakout").onclick = breakout;
                         document.getElementById("clearall-butt").onclick = clearForms;
@@ -146,28 +150,6 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
 
                         pushBodyRangeValuesToArray(pressmenArr, globalVar.pressmen);
                         pushBodyRangeValuesToArray(pressesArr, globalVar.presses);
-
-                        // for (let pressman of pressmenArr) {
-                        //   window[pressman] = + [];
-                        // }
-
-                        // let prop1 = {
-                        //   beans: "pickled",
-                        //   rice: "white"
-                        // };
-
-                        // let prop2 = {
-                        //   beans: "fart",
-                        //   rice: "none"
-                        // };
-
-                        // // console.log(Steve);
-
-                        // for (const key of globalVar.pressmen) {
-                        //   globalVar.operators[key] = prop1
-                        // };
-
-                        // console.log(globalVar.operators);
 
                         globalVar.pressmen.forEach((man) => {
                             globalVar.operators[man] = [];

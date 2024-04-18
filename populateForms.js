@@ -758,6 +758,19 @@ import { breakout } from "./breakout.js";
                                     masterBodyRange.values = masterArr; //write masterArr to the master table in Excel
 
                                     console.log(`There are ${missingForms.length} missing forms, listed here:`, missingForms);
+                                    // Add a splash screen here for the error. 
+                                    $("#loading-background").css("display", "none");
+                                    $("#missing-forms-background").css("display", "flex");
+                                    // Keeping it grammatically correct.
+                                    // Also they should never have more than 999 forms missing. But just in case, the string is toLocaleString.
+                                    $("#missing-list").text(`${missingForms.length == 1 ? "is" : "are"} ${(missingForms.length).toLocaleString()} ${missingForms.length == 1 ? "form" : "forms"}`)
+
+                                    // for each missingForms object, let's push a bulleted list. Note: If you do this, please turn the missing-list element from a p into a ul.
+                                    missingForms.forEach((prod)=>{
+                                        $("#missing-roster").append(`<li>Row ${prod.row} (${prod.code})- ${prod.orderStatus}</li>`)
+                                       })
+
+
 
                                 //#endregion ---------------------------------------------------------------------------------------------------------
                             //========================================================================================================================
@@ -767,7 +780,11 @@ import { breakout } from "./breakout.js";
 
                     activateEvents(); //turns on workbook events
 
-                    location.reload(); //reloads the workbook
+                    // If the missing forms pop-up is not present, reload.
+                    if (!($('#missing-forms-background').css('display') === 'flex')) {
+                        location.reload(); //reloads the workbook
+                    }
+                    
 
                 });
 

@@ -3,16 +3,17 @@ import { deactivateEvents, activateEvents, conditionalFormatting, refreshPivotTa
 import { buildTabulatorTables, organizeData } from "./tabulatorTables.js";
 import { updateDataFromTable } from "./pressSchedulingInfo.js";
 
+
 // ===================================================================================================================================================
     //#region Between Form Number Logic --------------------------------------------------------------------------------------------------------------
-    /**
-     * Determines if the form number is in range of min and max.
-     * @param {Number} min The beginning of the form range
-     * @param {Number} max The end of the form range
-     * @param {Number} test Current form number
-     * @returns {Boolean} True/False
-     */
-        function isBetween(min, max, test){
+        /**
+         * Determines if the form number is in range of min and max.
+         * @param {Number} min The beginning of the form range
+         * @param {Number} max The end of the form range
+         * @param {Number} test Current form number
+         * @returns {Boolean} True/False
+         */
+        function isBetween(min, max, test) {
             return Number(test) > min && Number(test) < max;
         }
     //#endregion -------------------------------------------------------------------------------------------------------------------------------------
@@ -382,11 +383,11 @@ import { updateDataFromTable } from "./pressSchedulingInfo.js";
 
                                         } else if (worksheet.name == "DIGE2R") {
 
-                                            if (isBetween(200,251,form)) { //digital silk
+                                            if (isBetween(200, 251, form)) { //digital silk
 
                                                 waste = globalVar.wasteData["Digital Silk"]["Waste"];
 
-                                            } else if (isBetween(250,301,form)) { //digital text
+                                            } else if (isBetween(250, 301, form)) { //digital text
 
                                                 waste = globalVar.wasteData["Digital Text"]["Waste"];
 

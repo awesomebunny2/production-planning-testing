@@ -148,6 +148,9 @@ import globalVar from "./globalVar.js";
                     } else if (rowInfo == "UA") { //make use art forms yellow
                         rowRange.format.fill.color = "#FFE699"
                         rowRange.format.font.color = "black"
+                    } else if (rowInfo == "DIGITAL") { //make use art forms yellow
+                        rowRange.format.fill.color = "#97d1a8"
+                        rowRange.format.font.color = "black"
                     } else { //make all other forms with text instead of numbers grey
                         rowRange.format.fill.color = "#BFBFBF"; //#FFF2CC
                         rowRange.format.font.color = "black"

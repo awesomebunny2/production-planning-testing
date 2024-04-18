@@ -288,10 +288,10 @@ import { deactivateEvents, activateEvents, createRowInfo } from "./universalFunc
                                                 //====================================================================================================
                                                     //#region PUSH TO DIGITAL BREAKOUT ---------------------------------------------------------------
 
-                                                        //if form number is between 101 & 599, then it is a digital form and should be duplicated into
+                                                        //if form number is between 200 & 699, then it is a digital form and should be duplicated into
                                                         //its own digital breakout (without taking it away from any other breakout it might fall into,
                                                         //which is why it is outside of the if/else area below)
-                                                        if (masterForms > 100 && masterForms < 600) {
+                                                        if (masterForms > 201 && masterForms < 700) {
 
                                                             digitalBreakout.push(masterRow);
                                                             digitalFormatting.push(formsObj);
@@ -431,11 +431,9 @@ import { deactivateEvents, activateEvents, createRowInfo } from "./universalFunc
                                                     //#region PUSH TO NORMAL BREAKOUTS ---------------------------------------------------------------
 
                                                         } else { //if neither shipping type nor has extras or cutoffs, treat normally
-
                                                             filteredData[masterType].push(masterRow);
                                                             globalVar.normalBreakoutsFormatting[masterType].push(formsObj);
                                                             // normalFormatting.push(formsObj);
-
                                                         };
 
                                                     //#endregion -------------------------------------------------------------------------------------
@@ -453,6 +451,42 @@ import { deactivateEvents, activateEvents, createRowInfo } from "./universalFunc
 
                                         //#endregion -------------------------------------------------------------------------------------------------
                                     //================================================================================================================
+
+                                };
+
+                            //#endregion -------------------------------------------------------------------------------------------------------------
+                        //============================================================================================================================
+
+                        //============================================================================================================================
+                            //#region SHOW EMPTY UJID WARNING IF MISSING ONE OR MORE AND DON'T CREATE BREAKOUTS --------------------------------------
+
+                                let emptyUJIDs = [];
+
+                                if (empty.length > 0) {
+                                    //show a warning box and do not generate breakout sheets
+
+                                    if (empty.length > 1) {
+
+                                        for (let u = 0; u < empty.length; u++) {
+
+                                            emptyUJIDs.push(empty[u][masterUJIDColumnIndex]);
+
+                                        }
+
+                                    } else {
+                                        emptyUJIDs.push(empty[0][masterUJIDColumnIndex]);
+                                    };
+
+                                    $("#empty-ujid").empty(); //removes all previous UJIDs from HTML element
+
+                                    // document.getElementById("empty-ujid").innerHTML = emptyUJIDs;
+                                    emptyUJIDs.forEach((emp) => {
+                                        $("#empty-ujid").append(`<li>${emp}</li>`)
+                                    })
+
+                                    emptyWarning();
+
+                                    return;
 
                                 };
 
@@ -544,7 +578,10 @@ import { deactivateEvents, activateEvents, createRowInfo } from "./universalFunc
                             //#endregion -------------------------------------------------------------------------------------------------------------
                         //============================================================================================================================
 
+                       
+
                         await context.sync();
+
 
                         //============================================================================================================================
                             //#region CREATE & FORMAT THE NORMAL TYPE BREAKOUTS ----------------------------------------------------------------------
@@ -679,36 +716,6 @@ import { deactivateEvents, activateEvents, createRowInfo } from "./universalFunc
                             //#endregion -------------------------------------------------------------------------------------------------------------
                         //============================================================================================================================
 
-                        //============================================================================================================================
-                            //#region SHOW EMPTY UJID WARNING IF MISSING ONE OR MORE AND DON'T CREATE BREAKOUTS --------------------------------------
-
-                                let emptyUJIDs = [];
-
-                                if (empty.length > 0) {
-                                    //show a warning box and do not generate breakout sheets
-
-                                    if (empty.length > 1) {
-
-                                        for (let u = 0; u < empty.length; u++) {
-
-                                            emptyUJIDs.push(empty[u][masterUJIDColumnIndex]);
-
-                                        }
-
-                                    } else {
-                                        emptyUJIDs = empty[0][masterUJIDColumnIndex];
-                                    };
-
-                                    document.getElementById("empty-ujid").innerHTML = emptyUJIDs;
-
-                                    emptyWarning();
-
-                                    return;
-
-                                };
-
-                            //#endregion -------------------------------------------------------------------------------------------------------------
-                        //============================================================================================================================
 
                         //============================================================================================================================
                             //#region CREATE & FORMAT SHIPPING BREAKOUT ------------------------------------------------------------------------------
@@ -1082,6 +1089,8 @@ import { deactivateEvents, activateEvents, createRowInfo } from "./universalFunc
             deactivateEvents();
 
             console.log("There are empty types preset. Exiting Breakout function...");
+
+            $("#loading-background").css("display", "none")
 
             $("#empty-background").css("display", "flex");
 
