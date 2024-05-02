@@ -37,7 +37,8 @@
     rowMoved: false,
     pressmen:[" "],
     presses:[" "],
-    daysOfWeek: [" ", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+    daysOfWeek: [" ", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+    headerPrefix: ""
     //pressmen: [" ", "Steve", "Roberto", "Ryan", "Jamie", "Cody", "Terry", "Paul"],
     //presses: [" ", 1, 2, 3, 4, "Digital 1", "Digital 2"]
 }

@@ -1,5 +1,5 @@
 import globalVar from "./globalVar.js";
-import { deactivateEvents, activateEvents, createDataSet, conditionalFormatting, createRowInfo } from "./universalFunctions.js";
+import { deactivateEvents, activateEvents, createDataSet, conditionalFormatting, createRowInfo, loadError } from "./universalFunctions.js";
 import { easyToReads } from "./E2Rs.js";
 import { pressSchedulingInfoTable } from "./pressSchedulingInfo.js";
 import { breakout } from "./breakout.js";
@@ -479,6 +479,7 @@ import { breakout } from "./breakout.js";
                                                     };
                                                 } catch (e) {
                                                     console.log(e);
+                                                    loadError(e.stack)
                                                 };
 
                                             //#endregion ---------------------------------------------------------------------------------------------
@@ -645,7 +646,8 @@ import { breakout } from "./breakout.js";
                                                                 code: masterRowInfo["Code"].value,
                                                                 company: masterRowInfo["Company"].value,
                                                                 total: masterRowInfo["Total"].value,
-                                                                orderStatus: masterRowInfo["Order Status"].value
+                                                                orderStatus: masterRowInfo["Order Status"].value,
+                                                                ujid: masterRowInfo["UJID"].value
                                                             });
 
                                                         };
@@ -767,7 +769,7 @@ import { breakout } from "./breakout.js";
 
                                     // for each missingForms object, let's push a bulleted list. Note: If you do this, please turn the missing-list element from a p into a ul.
                                     missingForms.forEach((prod)=>{
-                                        $("#missing-roster").append(`<li>Row ${prod.row} (${prod.code})- ${prod.orderStatus}</li>`)
+                                        $("#missing-roster").append(`<li>Row ${prod.row}: ${prod.ujid}</li>`)
                                        })
 
 
@@ -790,7 +792,7 @@ import { breakout } from "./breakout.js";
 
             } catch (err) {
                 console.error(err);
-                // showMessage(error, "show");
+                loadError(err.stack)
             };
 
             //========================================================================================================================================

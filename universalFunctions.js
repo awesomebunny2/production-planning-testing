@@ -116,8 +116,9 @@ import globalVar from "./globalVar.js";
                     objOfCells[0].format.fill.color = "#C00000";
                 } else if (rowInfo[0].includes("REPRINT") || rowInfo[0].includes("RPT")) {
                     objOfCells[0].format.font.bold = true;
-                    objOfCells[0].format.font.color = "white";
-                    objOfCells[0].format.fill.color = "#C65911";
+                    objOfCells[0].format.font.color = "red";
+                    // objOfCells[0].format.fill.color = "white";
+                    objOfCells[0].format.fill.clear();
                 } else {
                     objOfCells[0].format.fill.clear()
                     objOfCells[0].format.font.color = "black"
@@ -287,7 +288,7 @@ import globalVar from "./globalVar.js";
                 await callback();
             } catch (err) {
                 console.error(err);
-                showMessage(err, "show");
+                loadError(err.stack)
 
             };
         };
@@ -295,4 +296,21 @@ import globalVar from "./globalVar.js";
     //#endregion -------------------------------------------------------------------------------------------------------------------------------------
 //====================================================================================================================================================
 
-export { deactivateEvents, activateEvents, createDataSet, conditionalFormatting, createRowInfo, refreshPivotTable, tryCatch };
+//====================================================================================================================================================
+    //#region Error Window ---------------------------------------------------------------------------------------------------------------------------
+
+        /**
+         * Generate an error window with a means to submit a ticket to DevOps.
+         * @param {String} msg The error message
+         */
+        async function loadError(msg) {
+            document.querySelector("#err-background").style.display="flex";
+            const errorScreen= document.querySelector("#error-message");
+            errorScreen.innerHTML = `<span>Automatically generated report<br>${"-".repeat(10)}<br>${msg}</span>`;
+        };
+
+    //#endregion -------------------------------------------------------------------------------------------------------------------------------------
+//====================================================================================================================================================
+
+
+export { deactivateEvents, activateEvents, createDataSet, conditionalFormatting, createRowInfo, refreshPivotTable, tryCatch, loadError };

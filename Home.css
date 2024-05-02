@@ -34,6 +34,10 @@ body {
     align-items: center;
 }
 
+h1{
+    font-size: 18pt;
+}
+
 /* Style the scrollbar background */
 
 ::-webkit-scrollbar {
@@ -72,6 +76,7 @@ body {
 ul {
     margin: 0;
     padding: 0;
+    list-style: none;
 }
 
 .fill-out { /* pretty much just a class to make something 100% width */
@@ -780,7 +785,7 @@ b {
     display: none;
 }
 
-#reset-background, #empty-background, #loading-background, #missing-forms-background, #breakout-err-background {
+#reset-background, #empty-background, #loading-background, #missing-forms-background, #breakout-err-background, #err-background, #report-background, #format-background {
     display: none;
 }
 
@@ -788,11 +793,12 @@ b {
     border: 1px solid black;
     height: 25vh;
     max-height: 25vh;
-    width: 60%;
+    width: 85%;
     margin: auto;
     word-wrap: break-word;
     overflow-y: scroll;
-    padding: 5px 20px;
+    padding: 5px 10px;
+    background: rgba(0, 0, 0, 0.05);
 }
 
 .err-scroll > * {
@@ -807,6 +813,7 @@ b {
     background-color: rgba(48, 48, 48, 0.549);
     width: 100%;
     height: 100%;
+    z-index:3999;
 }
 
 .warning {
@@ -816,7 +823,7 @@ b {
     align-content: center;
     justify-content: center;
     position: absolute;
-    z-index: 1000;
+    z-index: 4000;
     background-color: rgb(248, 252, 246);
     width: 85%;
     /* height: 30%; */
@@ -841,6 +848,29 @@ b {
         text-align: center;
         orphans: 5;
         widows: 5;
+        font-size: 10pt;
+    }
+    .warning > input {
+        width: 80%
+    }
+    .warning > textarea {
+        resize: none;
+    }
+    .warning > input, .warning > label, .warning > textarea{
+        margin: auto; /* auto margin on all sides (centered) */
+    }
+    .warning > label {
+        margin-top: 8px;
+        font-size: 12pt;
+    }
+    #grouplabel{
+        margin-top: 0 !important;
+    }
+    #preview{
+        FONT-VARIANT: JIS78;
+        width: 90%;
+        font-size: 8pt !important;
+        text-align: center;
     }
 .one-button{
     text-align: center;
@@ -898,8 +928,32 @@ b {
     padding-top: 15px;
 }
 
+
 #empty-ujid {
     font-weight: 900;
+}
+
+#err-warning{
+    font-size: 11pt;
+    font-weight: 300;
+    text-align: center;
+    padding: 5px;
+    word-wrap: break-word;
+    width: 80%;
+    margin: auto;
+}
+
+#err-warning > input, #err-warning > textarea{
+    width: 90%;
+    margin: auto;
+}
+
+#error-message > span {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 8.5pt;
+    line-height: 1;
+    font-kerning: normal;
+    padding: 2px;
 }
 
 @media only screen and (max-width: 588px) {
@@ -1111,7 +1165,7 @@ b {
     display: none;
     width: 100%;
     flex-direction: column;
-    height: 100%;
+    height: 88vh;
 }
 
 @keyframes hide-div {
@@ -1181,12 +1235,12 @@ b {
     padding: 0px 20px 0px 20px;
     text-align: center;
     margin: 0;
-/*    margin: 0px 0px 15px 0px;
-*/}
+/*    margin: 0px 0px 15px 0px; */
+}
 
 #bottom {
-/*    padding: 10px 60px 10px 60px;
-*/    text-align: center;
+/*    padding: 10px 60px 10px 60px; */
+    text-align: center;
     width: 100%;
 }
 
@@ -1201,7 +1255,7 @@ hr {
 
 #welcome-header-section {
     text-align: center;
-    height: 35vh;
+    /* height: 35vh; */
     display: flex;
     flex-direction: column;
     align-items: center;

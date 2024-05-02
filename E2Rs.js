@@ -1,5 +1,5 @@
 import globalVar from "./globalVar.js";
-import { deactivateEvents, activateEvents, conditionalFormatting, refreshPivotTable } from "./universalFunctions.js";
+import { deactivateEvents, activateEvents, conditionalFormatting, refreshPivotTable, loadError } from "./universalFunctions.js";
 import { buildTabulatorTables, organizeData } from "./tabulatorTables.js";
 import { updateDataFromTable } from "./pressSchedulingInfo.js";
 
@@ -647,7 +647,7 @@ import { updateDataFromTable } from "./pressSchedulingInfo.js";
 
                                                                             } catch (err) {
                                                                                 console.error(err);
-                                                                                // showMessage(error, "show");
+                                                                                loadError(err.stack)
                                                                             };
 
                                                                         //#endregion -----------------------------------------------------------------
@@ -859,6 +859,7 @@ import { updateDataFromTable } from "./pressSchedulingInfo.js";
 
                                                     } catch (e) {
                                                         console.log(e);
+                                                        loadError(e.stack);
                                                     };
 
                                                 //#endregion -----------------------------------------------------------------------------------------

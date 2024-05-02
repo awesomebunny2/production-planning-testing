@@ -1,5 +1,5 @@
 import globalVar from "./globalVar.js";
-import { deactivateEvents, activateEvents, createRowInfo } from "./universalFunctions.js";
+import { deactivateEvents, activateEvents, createRowInfo, loadError } from "./universalFunctions.js";
 
 //====================================================================================================================================================
     //#region BREAKOUT FUNCTION ----------------------------------------------------------------------------------------------------------------------
@@ -9,8 +9,20 @@ import { deactivateEvents, activateEvents, createRowInfo } from "./universalFunc
          */
         async function breakout() {
 
-            deactivateEvents(); //turn off events
+            
+            // =======================================================================================================================================
+                // #region BREAKOUT HEADERS ----------------------------------------------------------------------------------------------------------
+                    $("#format-background").css("display", "flex");
+                    // Wait until they press "Go".
+                    await new Promise(resolve => {
+                        document.querySelector("#format-btn").addEventListener('click', resolve, { once: true });
+                    });
+                    globalVar.headerPrefix = $("#preview").val(); // Var to use this outside of this function.
 
+                    $("#format-background").css("display", "none");
+                // #endregion ------------------------------------------------------------------------------------------------------------------------
+            // =======================================================================================================================================
+            deactivateEvents(); //turn off events
             //========================================================================================================================================
                 //#region SHOW LOADING SCREEN --------------------------------------------------------------------------------------------------------
 
@@ -288,10 +300,11 @@ import { deactivateEvents, activateEvents, createRowInfo } from "./universalFunc
                                                 //====================================================================================================
                                                     //#region PUSH TO DIGITAL BREAKOUT ---------------------------------------------------------------
 
-                                                        //if form number is between 200 & 699, then it is a digital form and should be duplicated into
-                                                        //its own digital breakout (without taking it away from any other breakout it might fall into,
-                                                        //which is why it is outside of the if/else area below)
-                                                        if (masterForms > 201 && masterForms < 700) {
+                                                        /* if form number is between 200 & 699, then it is a digital form and should be duplicated 
+                                                        into its own digital breakout (without taking it away from any other breakout it might fall 
+                                                        into, which is why it is outside of the if/else area below) */
+                                                        // if (masterForms > 201 && masterForms < 700) {
+                                                        if ((masterForms == "DIGITAL") || (masterForms > 201 && masterForms < 700)) {
 
                                                             digitalBreakout.push(masterRow);
                                                             digitalFormatting.push(formsObj);
@@ -892,14 +905,14 @@ import { deactivateEvents, activateEvents, createRowInfo } from "./universalFunc
                         } catch (e) {
                             // console.log(`The value of v at error: ${v}`);
                             console.log(e);
+                            loadError(e.stack)
                         };
 
                     };
 
                 } catch (e) {
-                    // console.log(`The value of u at error: ${u}`);
-                    // console.log(`The value of v at error: ${v}`);
                     console.log(e);
+                    loadError(e.stack)
                 };
 
             };
@@ -982,7 +995,8 @@ import { deactivateEvents, activateEvents, createRowInfo } from "./universalFunc
             let mergedTitleRange = sheet.getRange("A1"); //get range of the new title row
 
             //set formatting values of the title cell
-            mergedTitleRange.values = [[line]];
+            // console.log("Format Func:", globalVar.headerPrefix)
+            mergedTitleRange.values = [[`${globalVar.headerPrefix} ${line}`]];
             mergedTitleRange.format.autofitColumns();
             mergedTitleRange.format.horizontalAlignment = "center";
             mergedTitleRange.format.verticalAlignment = "center";
@@ -1283,6 +1297,7 @@ import { deactivateEvents, activateEvents, createRowInfo } from "./universalFunc
                     resolve("Done.");
 
                 } catch (e) {
+                    loadError(e.stack)
                     reject(e);
                 };
 
