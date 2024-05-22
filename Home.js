@@ -31,10 +31,11 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
                                                                 
 */
 
+
+
     //#region ----------------------------------------------------------------------------------------------------------------------------------------
 
         Office.onReady((info) => {
-
             
             //========================================================================================================================================
                 //#region BINDING THE MAIN TASKPANE BUTTONS ------------------------------------------------------------------------------------------
@@ -53,7 +54,6 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
 
                         document.getElementById("err-report").addEventListener("click", async function(){
 
-                            // return console.log(`${document.querySelector("#error-message").innerHTML}`)
                             const response = await fetch("https://devops.themailshark.net/api/submitForm", {
                                 method: "POST",
                                 headers: {
@@ -137,7 +137,7 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
                             const preview = document.querySelector("#preview"); 
 
                             // The {var == "" ? "": " "} is to determine if a space needs added or not. If one of these is blank, we don't want extra spaces. Looks nasty, sorry! - Danny
-                            preview.value= `(${print}L) GRP ${group} WK ${week} INK ${inkstart} THRU ${inkend} / MAILS ${msweek} /`
+                            preview.value= `(${print}) GRP ${group} WK ${week} INK ${inkstart} THRU ${inkend} / MAILS ${msweek} /`
                         }
 
                         document.querySelector("#group").onkeyup = updatePreview;
@@ -152,7 +152,6 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
             //========================================================================================================================================
 
             try {Excel.run(async (context) => {
-
                 //====================================================================================================================================
                     //#region ASSIGNING SHEET VARIABLES ----------------------------------------------------------------------------------------------
 
@@ -609,6 +608,7 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
             });} catch(e){
                 loadError(e.stack)
             }
+
             
         });
 
@@ -662,7 +662,7 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
 
                         $("#select-tables").css("display", "none");
                         $("#week-tables").css("display", "none");
-                        $("#footer").css("display", "none");
+                        // $("#footer").css("display", "none");
 
                         $("#home-page").css("display", "flex");
 
@@ -676,7 +676,7 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
 
                         $("#select-tables").css("display", "block");
                         $("#week-tables").css("display", "flex");
-                        $("#footer").css("display", "flex");
+                        // $("#footer").css("display", "flex");
 
                         // currentPage = "Press Scheduling"
 
@@ -786,7 +786,7 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
 
                             $("#select-tables").css("display", "block");
                             $("#week-tables").css("display", "flex");
-                            $("#footer").css("display", "flex");
+                            // $("#footer").css("display", "flex");
 
                             // currentPage = "Press Scheduling";
 
@@ -795,7 +795,7 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
 
                             $("#select-tables").css("display", "none");
                             $("#week-tables").css("display", "none");
-                            $("#footer").css("display", "none");
+                            // $("#footer").css("display", "none");
 
                             $("#home-page").css("display", "flex");
 

@@ -1,6 +1,8 @@
 import globalVar from "./globalVar.js";
 import { deactivateEvents, activateEvents, createRowInfo, loadError } from "./universalFunctions.js";
 
+var showTitle = false; 
+
 //====================================================================================================================================================
     //#region BREAKOUT FUNCTION ----------------------------------------------------------------------------------------------------------------------
             
@@ -8,20 +10,8 @@ import { deactivateEvents, activateEvents, createRowInfo, loadError } from "./un
          * Creates all the breakout sheets and tables, as well as formatting the cells inside each breakout table
          */
         async function breakout() {
-
             
-            // =======================================================================================================================================
-                // #region BREAKOUT HEADERS ----------------------------------------------------------------------------------------------------------
-                    $("#format-background").css("display", "flex");
-                    // Wait until they press "Go".
-                    await new Promise(resolve => {
-                        document.querySelector("#format-btn").addEventListener('click', resolve, { once: true });
-                    });
-                    globalVar.headerPrefix = $("#preview").val(); // Var to use this outside of this function.
 
-                    $("#format-background").css("display", "none");
-                // #endregion ------------------------------------------------------------------------------------------------------------------------
-            // =======================================================================================================================================
             deactivateEvents(); //turn off events
             //========================================================================================================================================
                 //#region SHOW LOADING SCREEN --------------------------------------------------------------------------------------------------------
@@ -68,7 +58,7 @@ import { deactivateEvents, activateEvents, createRowInfo, loadError } from "./un
                         let masterArr = masterBodyRange.values;
                         let masterHeader = masterHeaderRange.values;
                         let masterRowItems = masterTableRows.items;
-                        let masterArrCopy = JSON.parse(JSON.stringify(masterBodyRange.values));
+                        let masterArrCopy = JSON.parse(JSON.stringify(masterBodyRange.values))
 
                     //#endregion ---------------------------------------------------------------------------------------------------------------------
                 //====================================================================================================================================
@@ -229,7 +219,7 @@ import { deactivateEvents, activateEvents, createRowInfo, loadError } from "./un
                                         });
 
                                     //#endregion -----------------------------------------------------------------------------------------------------
-                                //====================================================================================================================
+                                //================================= ===================================================================================
 
                             //#endregion -------------------------------------------------------------------------------------------------------------
                         //============================================================================================================================
@@ -238,7 +228,7 @@ import { deactivateEvents, activateEvents, createRowInfo, loadError } from "./un
                             //#region FOR EACH ROW IN MASTER, MOVE VALUES TO PROPER BREAKOUT ARRAY(S) ------------------------------------------------
 
                                 for (let masterRow of masterArr) {
-
+ 
                                     formsObj = {};
                                     
                                     //================================================================================================================
@@ -246,11 +236,16 @@ import { deactivateEvents, activateEvents, createRowInfo, loadError } from "./un
 
                                             //the following matches the master table headers with the data and column index in row [z], assigning each
                                             //as a property to each header within the masterRowInfo object.
+
                                             for (let name of masterHeader[0]) {
+                                                
                                                 createRowInfo(masterHeader, name, masterRow, masterArrCopy, masterRowInfo, z, masterSheet);
                                             };
+                                            
 
                                             z++;
+
+                                            
 
                                         //#endregion -------------------------------------------------------------------------------------------------
                                     //================================================================================================================
@@ -266,8 +261,44 @@ import { deactivateEvents, activateEvents, createRowInfo, loadError } from "./un
 
                                             let masterExtras = masterRowInfo["Extras"].value;
                                             let masterCutoff = masterRowInfo["Cutoff"].value;
+                                            let masterNotesColumnIndex = masterRowInfo["Notes"].columnIndex;
+
+                                            let masterNotes = masterRowInfo["Notes"].value;
+                                            let masterOptions = masterRowInfo["Options"].value;
+                                            let masterVersionNo = masterRowInfo["Version No"].value;
 
                                         //#endregion -------------------------------------------------------------------------------------------------
+                                    //================================================================================================================
+
+                                    //================================================================================================================
+                                        // #region COMBINE NOTES -------------------------------------------------------------------------------------
+
+                                            /* 
+                                                Explanation: This makes and array and joins the array based on how many items get added. This keeps 
+                                                the notes from having random " - " bits stuck on the end.
+                                            */
+                                            let arrayKeys = ["Notes", "Options", "Version No"]
+                                            let notesArr = new Array(); 
+                                            notesArr.push(masterNotes);
+
+                                            if (!/^(?:\s|,|\s*,\s*)$/.test(masterOptions)) {
+                                                notesArr.push(masterOptions);
+                                            }
+ 
+                                            if (!masterVersionNo.replace(/ /g, "") == "") {
+                                                notesArr.push(masterVersionNo);
+                                            }
+                                            console.log(notesArr.length)
+                                            if (notesArr.length == 1 ){
+                                                // If no version was pushed and no options were pushed...
+                                                masterRow[masterNotesColumnIndex] = masterNotes;
+                                            } else {
+                                            //    masterRow[masterNotesColumnIndex] = notesArr.map((n, i)=> `${arrayKeys[i]}: ${n}`).join(" - ");
+                                                masterRow[masterNotesColumnIndex] = notesArr.join(" - ")
+                                            }
+                                            
+
+                                        // #endregion ------------------------------------------------------------------------------------------------
                                     //================================================================================================================
 
                                     //================================================================================================================
@@ -500,8 +531,26 @@ import { deactivateEvents, activateEvents, createRowInfo, loadError } from "./un
                                     emptyWarning();
 
                                     return;
-
                                 };
+
+                                if (document.querySelector("#breakout").textContent == "Breakout" || showTitle == true){
+ 
+                                    // ===============================================================================================================
+                                        // #region BREAKOUT HEADERS ----------------------------------------------------------------------------------
+                                            $("#loading-background").css("display", "none");
+                                            $("#format-background").css("display", "flex");
+                                            // Wait until they press "Go".
+                                            await new Promise(resolve => {
+                                                document.querySelector("#format-btn").addEventListener('click', resolve, { once: true });
+                                            });
+                                            globalVar.headerPrefix = $("#preview").val(); // Var to use this outside of this function.
+                        
+                                            $("#format-background").css("display", "none");
+                                            $("#loading-background").css("display", "flex");
+                                        // #endregion ------------------------------------------------------------------------------------------------
+                                    // ===============================================================================================================
+
+                                    }
 
                             //#endregion -------------------------------------------------------------------------------------------------------------
                         //============================================================================================================================
@@ -826,7 +875,7 @@ import { deactivateEvents, activateEvents, createRowInfo, loadError } from "./un
          * @param {Excel Table Object} table The table object that you wish to hide some columns in
          * @param {Array} hideColArr The columns that you wish to hide, in an array
          */
-        function hideColumns(table, hideColArr) {
+        async function hideColumns(table, hideColArr) {
             for (let column of hideColArr) {
                 let thisColumn = table.columns.getItem(column).getRange();
                 thisColumn.columnHidden = true;
@@ -880,6 +929,9 @@ import { deactivateEvents, activateEvents, createRowInfo, loadError } from "./un
 
                     let thisRow = table.rows.getItemAt(u).getRange();
 
+
+
+
                     for (let v = 0; v < headerValues.length; v++) {
 
                         try {
@@ -888,6 +940,7 @@ import { deactivateEvents, activateEvents, createRowInfo, loadError } from "./un
                             cell.format.font.color = arrRow[headerValues[v]].formsFontColor;
                             cell.format.font.bold = arrRow[headerValues[v]].formsFontBold;
                             cell.format.font.italic = arrRow[headerValues[v]].formsFontItalic;
+                            cell.format.wrapText = true;
 
 
                             tempObj = {
@@ -897,7 +950,8 @@ import { deactivateEvents, activateEvents, createRowInfo, loadError } from "./un
                                 fill: arrRow[headerValues[v]].formsFill,
                                 fontColor: arrRow[headerValues[v]].formsFontColor,
                                 fontBold: arrRow[headerValues[v]].formsFontBold,
-                                fontItalic: arrRow[headerValues[v]].formsFontItalic
+                                fontItalic: arrRow[headerValues[v]].formsFontItalic,
+                                wrapText: true,
                             };
 
                             allFormattedCells.push(tempObj);
@@ -909,7 +963,6 @@ import { deactivateEvents, activateEvents, createRowInfo, loadError } from "./un
                         };
 
                     };
-
                 } catch (e) {
                     console.log(e);
                     loadError(e.stack)
@@ -938,6 +991,8 @@ import { deactivateEvents, activateEvents, createRowInfo, loadError } from "./un
             sheet.pageLayout.bottomMargin = 0;
             sheet.pageLayout.headerMargin = 0;
             sheet.pageLayout.footerMargin = 0;
+
+            sheet.pageLayout.paperSize = "Legal";
 
             sheet.pageLayout.centerHorizontally = true;
             sheet.pageLayout.centerVertically = true;
@@ -1022,6 +1077,34 @@ import { deactivateEvents, activateEvents, createRowInfo, loadError } from "./un
             //the table data for this line
             let tryThis = filteredData[line];
 
+            sheet.getUsedRange().format.autofitColumns();
+            sheet.getUsedRange().format.autofitRows();
+
+            // Here's the silliness. Here we go...
+            let rangeA = sheet.getRange("A1"); // Stretch out Forms
+            rangeA.format.columnWidth = 55; // Pixel numbers get doubled apparently?
+
+            let rangeB = sheet.getRange("B1"); // Stretch out Type
+            rangeB.format.columnWidth = 70;
+
+            let rangeC = sheet.getRange("C1"); // Stretch out Rep
+            rangeC.format.columnWidth = 65;
+
+            let rangeD = sheet.getRange("D1"); // Stretch out AS
+            rangeD.format.columnWidth = 65;
+
+            let rangeF = sheet.getRange("F1"); // Stretch out Product
+            rangeF.format.columnWidth = 100;
+
+            let rangeI = sheet.getRange("I1"); // Stretch out Email
+            rangeI.format.columnWidth = 170;
+
+            let rangeV = sheet.getRange("V1"); // Stretch out UPS Info
+            rangeV.format.columnWidth = 90;
+
+            let rangeW = sheet.getRange("W1"); // Stretch out UPS Info
+            rangeW.format.columnWidth = 80;
+
             //if the table data for the line is empty, push the empty sheet and table variables to the sheetAndTable object for referencing later
             if (tryThis == "") {
                 sheet.activate();
@@ -1034,10 +1117,10 @@ import { deactivateEvents, activateEvents, createRowInfo, loadError } from "./un
             table.rows.add(null /*add rows to the end of the table*/, tryThis);
 
             //autofit rows and columns in sheet
-            if (Office.context.requirements.isSetSupported("ExcelApi", "1.2")) {
-                sheet.getUsedRange().format.autofitColumns();
-                sheet.getUsedRange().format.autofitRows();
-            };
+            // if (Office.context.requirements.isSetSupported("ExcelApi", "1.2")) {
+            //     sheet.getUsedRange().format.autofitColumns();
+            //     sheet.getUsedRange().format.autofitRows();
+            // };
 
             sheet.activate();
 
@@ -1082,7 +1165,6 @@ import { deactivateEvents, activateEvents, createRowInfo, loadError } from "./un
 
             } else {
 
-                // console.log(globalVar.result);
                 return globalVar.result;
 
             };
@@ -1110,12 +1192,14 @@ import { deactivateEvents, activateEvents, createRowInfo, loadError } from "./un
 
             $("#set-to-ignore").on("click", () => {
                 console.log("setting to ignore...");
+                showTitle = true;
                 setBlanksToAllOther();
                 $("#empty-background").css("display", "none");
             });
 
             $("#handle-manually").on("click", () => {
                 console.log("letting user handle...");
+                showTitle = false;
                 $("#empty-background").css("display", "none");
             });
 
