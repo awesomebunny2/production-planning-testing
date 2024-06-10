@@ -288,7 +288,6 @@ var showTitle = false;
                                             if (!masterVersionNo.replace(/ /g, "") == "") {
                                                 notesArr.push(masterVersionNo);
                                             }
-                                            console.log(notesArr.length)
                                             if (notesArr.length == 1 ){
                                                 // If no version was pushed and no options were pushed...
                                                 masterRow[masterNotesColumnIndex] = masterNotes;
@@ -563,13 +562,19 @@ var showTitle = false;
                                             
                                         let columnsToHide = [];
 
-                                        let missingTable = addSheetAndTable("MISSING", allSheets, missingData, masterHeader, "Missing");
+                                        console.log("Stop! (Line 564)");
+                                        let missingTable = addSheetAndTable("MISSING", allSheets, missingData, masterHeader, "Missing", masterRowInfo);
 
-                                        let printedTable = addSheetAndTable("PRINTED", allSheets, missingData, masterHeader, "Printed");
+                                        let printedTable = addSheetAndTable("PRINTED", allSheets, missingData, masterHeader, "Printed", masterRowInfo);
 
-                                        let ignoreTable = addSheetAndTable("IGNORE", allSheets, missingData, masterHeader, "Ignore");
+                                        let ignoreTable = addSheetAndTable("IGNORE", allSheets, missingData, masterHeader, "Ignore", masterRowInfo);
 
-                                        let digitalTable = addSheetAndTable("DIGITAL", allSheets, missingData, masterHeader, "Digital");
+                                        let digitalTable = addSheetAndTable("DIGITAL", allSheets, missingData, masterHeader, "Digital", masterRowInfo);
+
+                                        // MA/UA sort?
+                                        (async function(){
+
+                                        })
 
                                     //#endregion -----------------------------------------------------------------------------------------------------
                                 //====================================================================================================================
@@ -734,6 +739,7 @@ var showTitle = false;
                                                             thisTable.table, globalVar.normalBreakoutsFormatting[line], normalRowCount.value, 
                                                             masterHeader, tableName
                                                         );
+                                                        await context.sync();
 
                                                     //#endregion -------------------------------------------------------------------------------------
                                                 //====================================================================================================
@@ -984,18 +990,21 @@ var showTitle = false;
          * Sets the specified sheet up with the print settings that Tyndra typically uses
          * @param {Excel Sheet Object} sheet The sheet that you wish to apply print settings to
          */
-        function printSettings(sheet) {
+function printSettings(sheet) {
+            /*
+            Currently they are vertically & horizontally centered. Just keep horizontal, remove vertical centering. Also change Margin Top to 0.5� and Margin Bottom to 0.25�
+            */
             sheet.pageLayout.rightMargin = 0;
             sheet.pageLayout.leftMargin = 0;
-            sheet.pageLayout.topMargin = 0;
-            sheet.pageLayout.bottomMargin = 0;
+            sheet.pageLayout.topMargin = 0.5;
+            sheet.pageLayout.bottomMargin = 0.25;
             sheet.pageLayout.headerMargin = 0;
             sheet.pageLayout.footerMargin = 0;
 
             sheet.pageLayout.paperSize = "Legal";
 
             sheet.pageLayout.centerHorizontally = true;
-            sheet.pageLayout.centerVertically = true;
+            sheet.pageLayout.centerVertically = false;
 
             let pageLayoutZoomOptions = {
                 'horizontalFitToPages': 1,
@@ -1023,9 +1032,10 @@ var showTitle = false;
          * @param {Object} filteredData An object containing all the row values for the sheet that is going to be made
          * @param {Array} masterHeader An array of arrays containing the header values for the master sheet
          * @param {String} tableName What you want the table's name to be
+         * @param {Object} masterRowInfo Information on the master row
          * @returns 
          */
-        function addSheetAndTable(line, allSheets, filteredData, masterHeader, tableName) {
+         function addSheetAndTable(line, allSheets, filteredData, masterHeader, tableName, masterRowInfo) {
 
             let table = "";
             let tableColumnLetter = "";
@@ -1050,7 +1060,7 @@ var showTitle = false;
             let mergedTitleRange = sheet.getRange("A1"); //get range of the new title row
 
             //set formatting values of the title cell
-            // console.log("Format Func:", globalVar.headerPrefix)
+            // console.log("Format Func:", line)
             mergedTitleRange.values = [[`${globalVar.headerPrefix} ${line}`]];
             mergedTitleRange.format.autofitColumns();
             mergedTitleRange.format.horizontalAlignment = "center";
@@ -1075,7 +1085,7 @@ var showTitle = false;
             };
 
             //the table data for this line
-            let tryThis = filteredData[line];
+            let currentSheet = filteredData[line];
 
             sheet.getUsedRange().format.autofitColumns();
             sheet.getUsedRange().format.autofitRows();
@@ -1105,22 +1115,78 @@ var showTitle = false;
             let rangeW = sheet.getRange("W1"); // Stretch out UPS Info
             rangeW.format.columnWidth = 80;
 
+
+            const rangeA_E = sheet.getRange("A:E");
+            const rangeJ_Q = sheet.getRange("J:Q");
+
+            rangeA_E.format.horizontalAlignment = "Center";
+            rangeJ_Q.format.horizontalAlignment = "Center";
+
             //if the table data for the line is empty, push the empty sheet and table variables to the sheetAndTable object for referencing later
-            if (tryThis == "") {
+            if (currentSheet == "") {
                 sheet.activate();
                 sheetAndTable.sheet = sheet;
                 sheetAndTable.table = table;
                 return sheetAndTable;
-            };
+            }
+
+            // MA/UA Sort ----------------------------------------------------------------------------------------------------------------------------
+            let uaRows = currentSheet.filter(row => row[0]=="UA");
+            
+            console.log(currentSheet);
+            console.log(uaRows);
+
+            uaRows.forEach(row => {
+
+                // Remove this row from currentSheet
+                currentSheet.splice(currentSheet.indexOf(row), 1)
+
+                // Get the target row from 4th col
+                let ref = row[18].split("-")[1]
+
+
+                // Find the row in currentSheet that has the ref value as the 3rd index
+                let refRow = currentSheet.find(row => row[4] === Number(ref))
+                let targetIndex = currentSheet.indexOf(refRow)
+                // Add this row after the row at the target index
+                currentSheet.splice(targetIndex + 1, 0, row)
+
+            })
 
             //adds the line info from filteredData as rows to the end of the table
-            table.rows.add(null /*add rows to the end of the table*/, tryThis);
+            table.rows.add(null /*add rows t o the end of the table*/, currentSheet);
 
-            //autofit rows and columns in sheet
-            // if (Office.context.requirements.isSetSupported("ExcelApi", "1.2")) {
-            //     sheet.getUsedRange().format.autofitColumns();
-            //     sheet.getUsedRange().format.autofitRows();
-            // };
+            // Type (B), EDDM (P), Order Status (Q), Version No (S), Artwork (T), Options (U), & UJID (W)
+            const columnsToHide = ['B', 'P', 'Q', 'S', 'T', 'U', 'W'];
+            columnsToHide.forEach(column => {
+                const hideRange = sheet.getRange(`${column}:${column}`);
+                hideRange.columnHidden = true;
+            });            
+
+             // Have Digital and Shipping Breakouts sorted by Form numbers. For Fold Only Breakout, sort by product, then by company
+             if (line == "Fold Only") {
+                 const foldTable = sheet.tables.getItem("FoldOnly");
+
+                 // Apply the sort
+                 foldTable.sort.apply([
+                     { key: 5, ascending: true }, // '5' is the column number for 'product'
+                     { key: 6, ascending: true },  // '6' is the column number for 'company'
+                     { key: 3, ascending: true },  // '3' is the column number for 'code'
+                 ]);
+
+             }
+             else if (line == "DIGITAL" || line == "Shipping") {
+                 console.log(line)
+                 const digiTable = sheet.tables.getItem(tableName);
+                 // newTable.getSort().apply([{ key: 0, ascending: true }]);
+                 digiTable.sort.apply([
+                     { key: 0, ascending: true } // '0' is the column number for 'Form'
+                 ]);
+
+             }
+
+             // MA/UA sort?
+             
 
             sheet.activate();
 
