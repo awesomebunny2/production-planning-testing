@@ -1132,9 +1132,6 @@ function printSettings(sheet) {
 
             // MA/UA Sort ----------------------------------------------------------------------------------------------------------------------------
             let uaRows = currentSheet.filter(row => row[0]=="UA");
-            
-            console.log(currentSheet);
-            console.log(uaRows);
 
             uaRows.forEach(row => {
 
@@ -1176,17 +1173,41 @@ function printSettings(sheet) {
 
              }
              else if (line == "DIGITAL" || line == "Shipping") {
-                 console.log(line)
                  const digiTable = sheet.tables.getItem(tableName);
-                 // newTable.getSort().apply([{ key: 0, ascending: true }]);
                  digiTable.sort.apply([
                      { key: 0, ascending: true } // '0' is the column number for 'Form'
                  ]);
 
              }
 
-             // MA/UA sort?
-             
+            // Move Z-shelf to the bottom.
+            let indexes = []
+            let zRows = currentSheet.filter((row, i) => {
+                if (row[0] == "ZSHELF") {
+                    indexes.push(i)
+                    return row 
+                }
+            });
+
+            let formattingRows = globalVar.normalBreakoutsFormatting[line];
+            
+            zRows.forEach(row => {
+
+                // Remove this row from currentSheet
+                currentSheet.splice(currentSheet.indexOf(row), 1)
+
+                // Add to the end.
+                currentSheet.push(row)
+            })
+
+            // Sorting the formattingRows
+            indexes.sort((a, b) => b - a);
+
+            // Sort formattingRows so that the items at the indexes in the array "indexes" are at the bottom
+            let elementsToMove = indexes.map(index => formattingRows.splice(index, 1)[0]);
+            if (elementsToMove.length > 0) {
+                formattingRows.push(...elementsToMove);
+            }             
 
             sheet.activate();
 
