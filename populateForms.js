@@ -376,6 +376,12 @@ import { breakout } from "./breakout.js";
 
                                     let missingForms = [];
 
+                                    let missingProducts = [];
+
+                                    let missingProductAddresses = [];
+
+                                    let rowNum = 2;
+
                                     for (var masterRow of masterArr) { //for each row in the master sheet...
 
                                         //============================================================================================================
@@ -475,12 +481,28 @@ import { breakout } from "./breakout.js";
 
                                                     //Otherwise, use the default breakout for the product data
                                                     if (!foldOnlyOverwrite) {
-                                                        masterBreakout = globalVar.productData[masterProduct]["Breakout"];
+                                                        let validProduct = false;
+                                                        for (let key in globalVar.productData) {
+                                                            if (key == masterProduct) {
+                                                                validProduct = true;
+                                                            };
+                                                        };
+
+                                                        if (validProduct) {
+                                                            masterBreakout = globalVar.productData[masterProduct]["Breakout"];
+                                                        } else {                                                   
+
+                                                            missingProducts.push(masterProduct);
+                                                            missingProductAddresses.push(`Row ${rowNum}`);
+
+                                                        };
                                                     };
                                                 } catch (e) {
                                                     console.log(e);
                                                     loadError(e.stack)
                                                 };
+
+                                                rowNum = rowNum + 1;
 
                                             //#endregion ---------------------------------------------------------------------------------------------
                                         //============================================================================================================
@@ -755,23 +777,54 @@ import { breakout } from "./breakout.js";
 
                                         z = z + 1;
 
-                                    };
+                    };
 
-                                    masterBodyRange.values = masterArr; //write masterArr to the master table in Excel
 
-                                    console.log(`There are ${missingForms.length} missing forms, listed here:`, missingForms);
-                                    // Add a splash screen here for the error. 
-                                    $("#loading-background").css("display", "none");
-                                    $("#missing-forms-background").css("display", "flex");
-                                    // Keeping it grammatically correct.
-                                    // Also they should never have more than 999 forms missing. But just in case, the string is toLocaleString.
-                                    $("#missing-list").text(`${missingForms.length == 1 ? "is" : "are"} ${(missingForms.length).toLocaleString()} ${missingForms.length == 1 ? "form" : "forms"}`)
+                    masterBodyRange.values = masterArr; //write masterArr to the master table in Excel
 
-                                    // for each missingForms object, let's push a bulleted list. Note: If you do this, please turn the missing-list element from a p into a ul.
-                                    missingForms.forEach((prod)=>{
-                                        $("#missing-roster").append(`<li>Row ${prod.row}: ${prod.ujid}</li>`)
-                                       })
+                    if (missingProducts.length > 0) {
+                        let missingProdNoDups = [...new Set(missingProducts)];
+                        console.log(`There are some products in the master sheet that do not have an associated type in the validation table. Here are the product names: `, missingProdNoDups);
+                        console.log(`And here are the addresses of the type cell's that are missing info: `, missingProductAddresses);
 
+                        $("#loading-background").css("display", "none");
+                        $("#missing-product-types-background").css("display", "flex");
+
+                        missingProdNoDups.forEach((prod) => {
+                            $("#missing-prod-type-list").append(`<li>${prod}</li>`)
+                        });
+
+                        missingProductAddresses.forEach((prod) => {
+                            $("#missing-prod-type-row-list").append(`<li>${prod}</li>`)
+                        });
+
+                        console.log(`There are ${missingForms.length} missing forms, listed here:`, missingForms);
+
+                        // Also they should never have more than 999 forms missing. But just in case, the string is toLocaleString.
+                        $("#missing-list").text(`${missingForms.length == 1 ? "is" : "are"} ${(missingForms.length).toLocaleString()} ${missingForms.length == 1 ? "form" : "forms"}`)
+
+                        // for each missingForms object, let's push a bulleted list. Note: If you do this, please turn the missing-list element from a p into a ul.
+                        missingForms.forEach((prod) => {
+                            $("#missing-roster").append(`<li>Row ${prod.row}: ${prod.ujid}</li>`)
+                        });
+
+                    } else {
+                        console.log(`There are ${missingForms.length} missing forms, listed here:`, missingForms);
+                        // Add a splash screen here for the error. 
+                        $("#loading-background").css("display", "none");
+                        $("#missing-forms-background").css("display", "flex");
+                        // Keeping it grammatically correct.
+                        // Also they should never have more than 999 forms missing. But just in case, the string is toLocaleString.
+                        $("#missing-list").text(`${missingForms.length == 1 ? "is" : "are"} ${(missingForms.length).toLocaleString()} ${missingForms.length == 1 ? "form" : "forms"}`)
+
+                        // for each missingForms object, let's push a bulleted list. Note: If you do this, please turn the missing-list element from a p into a ul.
+                        missingForms.forEach((prod) => {
+                            $("#missing-roster").append(`<li>Row ${prod.row}: ${prod.ujid}</li>`)
+                        });
+
+                    }
+
+                                   
 
 
                                 //#endregion ---------------------------------------------------------------------------------------------------------
@@ -782,10 +835,10 @@ import { breakout } from "./breakout.js";
 
                     activateEvents(); //turns on workbook events
 
-                    // If the missing forms pop-up is not present, reload.
-                    if (!($('#missing-forms-background').css('display') === 'flex')) {
+                    // If the missing forms or missing product type pop-up is not present, reload.
+                    if (($('#missing-forms-background').css('display') === 'none') && ($('#missing-product-types-background').css('display') === 'none')) {
                         location.reload(); //reloads the workbook
-                    }
+                    };
                     
 
                 });

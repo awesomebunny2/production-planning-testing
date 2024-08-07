@@ -50,7 +50,7 @@
 
 
 <body class="ms-Fabric" dir="ltr">
-
+    <!-- <button id="doIt">ugh</button> -->
     <div id="header" class="zoom-title">
 
         <div id="main-title-head" class="title-head">
@@ -214,28 +214,28 @@
 
     <div id="format-background" class="background">
         <div id="format-window" class="warning">
-                <h1>Breakout Sheets Title</h1>
-                <p>The following data fields will be added to the beginning of each of the breakout sheets title area.</p>
-                <label for="group" id="grouplabel">Group</label>
-                <input id="group" type="text">
+            <h1>Breakout Sheets Title</h1>
+            <p>The following data fields will be added to the beginning of each of the breakout sheets title area.</p>
+            <label for="group" id="grouplabel">Group</label>
+            <input id="group" type="text">
 
-                <label for="print">Print Date</label>
-                <input id="print" type="text">
+            <label for="print">Print Date</label>
+            <input id="print" type="text">
 
-                <label for="week">Week</label>
-                <input id="week" type="text">
+            <label for="week">Week</label>
+            <input id="week" type="text">
 
-                <label for="inkstart">Ink Start</label>
-                <input id="inkstart" type="text">
+            <label for="inkstart">Ink Start</label>
+            <input id="inkstart" type="text">
 
-                <label for="inkend">Ink End</label>
-                <input id="inkend" type="text">
+            <label for="inkend">Ink End</label>
+            <input id="inkend" type="text">
 
-                <label for="msweek">MS Week</label>
-                <input id="msweek" type="text">
+            <label for="msweek">MS Week</label>
+            <input id="msweek" type="text">
 
-                <label for="preview">Preview</label>
-                <textarea id="preview" disabled></textarea>
+            <label for="preview">Preview</label>
+            <textarea id="preview" disabled></textarea>
             <div class="one-button">
                 <button id="format-btn" class="alt-btn">Go</button>
             </div>
@@ -244,8 +244,8 @@
 
     <div id="report-background" class="background">
         <div id="report-window" class="warning">
-                <h1>Thank you!</h1>
-                <p>Your report has been successfully sent to DevOps. We will get back to you shortly.</p>
+            <h1>Thank you!</h1>
+            <p>Your report has been successfully sent to DevOps. We will get back to you shortly.</p>
             <div class="two-buttons">
                 <button id="err-reload2" class="alt-btn">Reload</button>
             </div>
@@ -254,16 +254,16 @@
 
     <div id="err-background" class="background">
         <div id="err-warning" class="warning">
-                <h1>ERROR</h1>
-                <p>Oops. Something went wrong. Please either reload the add-in or click "Report" to automatically send a ticket to DevOps.</p>
-                <div id="error-message" class="err-scroll" style="display: none;"></div>
-                <label for="reportEmail">If you would like to report this error, please input your Mail Shark employee email below and click "Report".</label>
-                <input type="email" id="reportEmail" placeholder="user@themailshark.com">
-                <br>
-                <label for="brief">A brief explanation of what happened (Optional):</label>
-                <textarea id="brief"></textarea>
-                <hr>
-            
+            <h1>ERROR</h1>
+            <p>Oops. Something went wrong. Please either reload the add-in or click "Report" to automatically send a ticket to DevOps.</p>
+            <div id="error-message" class="err-scroll" style="display: none;"></div>
+            <label for="reportEmail">If you would like to report this error, please input your Mail Shark employee email below and click "Report".</label>
+            <input type="email" id="reportEmail" placeholder="user@themailshark.com">
+            <br>
+            <label for="brief">A brief explanation of what happened (Optional):</label>
+            <textarea id="brief"></textarea>
+            <hr>
+
             <div class="two-buttons">
                 <button id="err-reload" class="alt-btn">Reload</button>
                 <button id="err-report" class="alt-btn" disabled>Report</button>
@@ -286,6 +286,31 @@
                 <button id="hide-missing" class="alt-btn">OK</button>
             </div>
         </div>
+    </div>
+
+
+    <div id="missing-product-types-background" class="background">
+
+        <div id="product-type-warning" class="warning">
+
+            <h1>WARNING</h1>
+            <p>The following products in the master sheet do not have any associated breakout type in the Validation sheet:</p>
+            <div class="err-scroll smaller-scroll">
+                <ul id="missing-prod-type-list"></ul>
+            </div>
+
+            <p>Below are all the rows in the master table that are missing type values because of this:</p>
+            <div class="err-scroll smaller-scroll">
+                <ul id="missing-prod-type-row-list"></ul>
+            </div>
+            <hr>
+            <p>Please make sure to assign a proper breakout line for each of the missing types in the rows above before clicking "Breakout"</p>
+            <div class="one-button">
+                <button id="hide-missing-prod-type" class="alt-btn">OK</button>
+            </div>
+
+        </div>
+
     </div>
 
     <div id="reset-background" class="background">
@@ -339,7 +364,7 @@
     </div>
 
     <div id="absolute-bottom">
-        <p id="version">Version 1.4.3 - Created by Matt Calvert</p>
+        <p id="version">Version 1.4.6 - Created by Matt Calvert</p>
     </div>
 
     <!--bleh-->

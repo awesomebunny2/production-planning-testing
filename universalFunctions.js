@@ -180,8 +180,18 @@ import globalVar from "./globalVar.js";
          * @param {Object} obj An empty object that will be loaded with all the current row data from the table matched to the column headers
          * @param {Number} rowIndex The index of the current row in the table
          * @param {Object} worksheet The worksheet object associated with the range
+         * @param {Boolean} toBeReturned If the end result should be an object that's returned or not.
          */
-        function createRowInfo(head, columnName, rowValues, copyTable, obj, rowIndex, worksheet) {
+
+        function createRowInfo(head, columnName, rowValues, copyTable, obj, rowIndex, worksheet, toBeReturned) {
+
+            // let rowArr;
+            // if (obj[columnName]){
+            //     // This already exists
+            //     rowArr = obj[columnName];
+            // } else {
+            //     rowArr=[];
+            // }
 
             let columnIndex = findColumnIndex(head, columnName);
 
@@ -203,12 +213,35 @@ import globalVar from "./globalVar.js";
                 },
                 style: true
             });
+
+               //[ length of 22
+                    //{value: "", cellProps: ""} cell1
+                    //{value: "", cellProps: ""} cell2
+                    //{value: "", cellProps: ""} cell3
+                //]
+
+            if (toBeReturned){
+
+
+                return {
+                    columnIndex,
+                    value,
+                    cellProps
+                };
+
+                // rowArr.push(newObj);
+
+                // obj[columnName] = rowArr;
+
+                // return 
+            } else {
+                obj[columnName] = {
+                    columnIndex,
+                    value,
+                    cellProps
+                };
+            }
             
-            obj[columnName] = {
-                columnIndex,
-                value,
-                cellProps
-            };
         };
 
     //#endregion -------------------------------------------------------------------------------------------------------------------------------------
@@ -306,6 +339,7 @@ import globalVar from "./globalVar.js";
 
     //#endregion -------------------------------------------------------------------------------------------------------------------------------------
 //====================================================================================================================================================
+
 
 
 export { deactivateEvents, activateEvents, createDataSet, conditionalFormatting, createRowInfo, refreshPivotTable, tryCatch, loadError };

@@ -786,7 +786,7 @@ b {
     display: none;
 }
 
-#reset-background, #empty-background, #loading-background, #missing-forms-background, #breakout-err-background, #err-background, #report-background, #format-background {
+#reset-background, #empty-background, #loading-background, #missing-forms-background, #missing-product-types-background, #breakout-err-background, #err-background, #report-background, #format-background {
     display: none;
 }
 
@@ -1287,4 +1287,9 @@ hr {
 
 .top-sub-text {
     margin-bottom: 15px !important;
+}
+
+.smaller-scroll {
+    height: 10vh;
+    max-height: 15vh;
 }

@@ -226,11 +226,37 @@ var showTitle = false;
                
                         //============================================================================================================================
                             //#region FOR EACH ROW IN MASTER, MOVE VALUES TO PROPER BREAKOUT ARRAY(S) ------------------------------------------------
+                                globalVar.masterCellData = {};
+
+                                for (let row of masterArr){
+
+                                    let rowUjid= row[22];
+
+                                    let rowArr = [];
+
+                                    //the following matches the master table headers with the data and column index in row [z], assigning each
+                                    //as a property to each header within the masterRowInfo object.
+
+                                    for (let name of masterHeader[0]) {
+                                        
+                                        // createRowInfo(masterHeader, name, masterRow, masterArrCopy, masterRowInfo, z, masterSheet);
+                                        const cellData = createRowInfo(masterHeader, name, row, null, null, z, masterSheet, true);
+
+                                        rowArr.push(cellData);
+                                        
+                                    };
+
+                                    globalVar.masterCellData[rowUjid] = rowArr;                                    
+
+                                    z++;
+
+                                };
+
+                                        
+                                await context.sync();
 
                                 for (let masterRow of masterArr) {
- 
-                                    formsObj = {};
-                                    
+
                                     //================================================================================================================
                                         //#region CREATE ROW INFO OBJECT FOR CURRENT ROW IN MASTER ---------------------------------------------------
 
@@ -244,8 +270,6 @@ var showTitle = false;
                                             
 
                                             z++;
-
-                                            
 
                                         //#endregion -------------------------------------------------------------------------------------------------
                                     //================================================================================================================
@@ -309,15 +333,19 @@ var showTitle = false;
                                                 let formsFontColor = masterRowInfo[head].cellProps.value[0][0].format.font.color
                                                 let formsFontBold = masterRowInfo[head].cellProps.value[0][0].format.font.bold
                                                 let formsFontItalic = masterRowInfo[head].cellProps.value[0][0].format.font.italic
+                                                let formsValue = masterRowInfo[head].value
 
                                                 formsObj[head] = {
                                                     formsAddress,
                                                     formsFill,
                                                     formsFontColor,
                                                     formsFontBold,
-                                                    formsFontItalic
+                                                    formsFontItalic,
+                                                    formsValue
                                                 };
                                             };
+
+                                            let formsObjCopy = JSON.parse(JSON.stringify(formsObj));
 
                                         //#endregion -------------------------------------------------------------------------------------------------
                                     //================================================================================================================
@@ -333,11 +361,10 @@ var showTitle = false;
                                                         /* if form number is between 200 & 699, then it is a digital form and should be duplicated 
                                                         into its own digital breakout (without taking it away from any other breakout it might fall 
                                                         into, which is why it is outside of the if/else area below) */
-                                                        // if (masterForms > 201 && masterForms < 700) {
-                                                        if ((masterForms == "DIGITAL") || (masterForms > 201 && masterForms < 700)) {
-
+                                                        if ((masterForms == "DIGITAL") || masterForms >= 201 && masterForms <= 700) {
+                                                            // masterForms > 201 && masterForms < 700
                                                             digitalBreakout.push(masterRow);
-                                                            digitalFormatting.push(formsObj);
+                                                            digitalFormatting.push(formsObjCopy);
 
                                                             missingData["DIGITAL"].push(masterRow);
 
@@ -349,10 +376,10 @@ var showTitle = false;
                                                 //====================================================================================================
                                                     //#region PUSH TO SHIPPING BREAKOUT --------------------------------------------------------------
 
-                                                        if (masterType == "Shipping") { //if type is shipping, push to just shipping array
+                                                        if (masterType == "Shipping" && (masterForms !== "IGNORE")) { //if type is shipping, push to just shipping array
 
                                                             shipping.push(masterRow);
-                                                            shippingFormatting.push(formsObj);
+                                                            shippingFormatting.push(formsObjCopy);
 
                                                             missingData["Shipping"].push(masterRow);
 
@@ -362,10 +389,9 @@ var showTitle = false;
                                                 //====================================================================================================
                                                     //#region PUSH TO IGNORE BREAKOUT (IF TYPE IS IGNORE) --------------------------------------------
 
-                                                        } else if (masterType == "Ignore") {
-
+                                                        } else if (masterType == "Ignore" || masterForms == "IGNORE") {
                                                             ignore.push(masterRow);
-                                                            ignoreFormatting.push(formsObj);
+                                                            ignoreFormatting.push(formsObjCopy);
 
                                                             missingData["IGNORE"].push(masterRow);
 
@@ -434,36 +460,21 @@ var showTitle = false;
                                                         } else if (masterForms == "MISSING") { 
 
                                                             missing.push(masterRow);
-                                                            missingFormatting.push(formsObj);
+                                                            missingFormatting.push(formsObjCopy);
 
                                                             missingData["MISSING"].push(masterRow);
                                                             filteredData[masterType].push(masterRow);
-                                                            globalVar.normalBreakoutsFormatting[masterType].push(formsObj);
+                                                            globalVar.normalBreakoutsFormatting[masterType].push(formsObjCopy);
 
                                                     //#endregion -------------------------------------------------------------------------------------
                                                 //====================================================================================================
 
                                                 //====================================================================================================
-                                                    //#region PUSH TO IGNORE BREAKOUT (IF FORM IS IGNORE) --------------------------------------------
-
-                                                        } else if (masterForms == "IGNORE") {
-
-                                                            // console.log("I need to be ignored");
-                                                            ignore.push(masterRow);
-                                                            ignoreFormatting.push(formsObj);
-
-                                                            missingData["IGNORE"].push(masterRow);
-
-                                                    //#endregion -------------------------------------------------------------------------------------
-                                                //====================================================================================================
-
-                                                //====================================================================================================
-                                                    //#region PUSH TO PRINTED BREAKOUT ---------------------------------------------------------------
-
+                                                    //#region PUSH TO PRINTED BREAKOUT (IF FORM IS IGNORE) --------------------------------------------
                                                         } else if (masterForms == "PRINTED") {
 
                                                             printed.push(masterRow);
-                                                            printedFormatting.push(formsObj);
+                                                            printedFormatting.push(formsObjCopy);
 
                                                             missingData["PRINTED"].push(masterRow);
 
@@ -473,10 +484,22 @@ var showTitle = false;
                                                 //====================================================================================================
                                                     //#region PUSH TO NORMAL BREAKOUTS ---------------------------------------------------------------
 
-                                                        } else { //if neither shipping type nor has extras or cutoffs, treat normally
+                                                        } else if (masterForms == "APPAREL") {
+
+                                                            filteredData['Apparel'].push(masterRow);
+                                                            globalVar.normalBreakoutsFormatting['Apparel'].push(formsObjCopy);
+
+                                                    //#endregion -------------------------------------------------------------------------------------
+                                                //====================================================================================================
+
+                                                //====================================================================================================
+                                                    //#region PUSH TO NORMAL BREAKOUTS ---------------------------------------------------------------
+
+                                                        } else { 
+                                                            //if neither shipping type nor has extras or cutoffs, treat normally
                                                             filteredData[masterType].push(masterRow);
-                                                            globalVar.normalBreakoutsFormatting[masterType].push(formsObj);
-                                                            // normalFormatting.push(formsObj);
+                                                            globalVar.normalBreakoutsFormatting[masterType].push(formsObjCopy);
+                                                            // normalFormatting.push(formsObjCopy);
                                                         };
 
                                                     //#endregion -------------------------------------------------------------------------------------
@@ -562,7 +585,6 @@ var showTitle = false;
                                             
                                         let columnsToHide = [];
 
-                                        console.log("Stop! (Line 564)");
                                         let missingTable = addSheetAndTable("MISSING", allSheets, missingData, masterHeader, "Missing", masterRowInfo);
 
                                         let printedTable = addSheetAndTable("PRINTED", allSheets, missingData, masterHeader, "Printed", masterRowInfo);
@@ -571,10 +593,6 @@ var showTitle = false;
 
                                         let digitalTable = addSheetAndTable("DIGITAL", allSheets, missingData, masterHeader, "Digital", masterRowInfo);
 
-                                        // MA/UA sort?
-                                        (async function(){
-
-                                        })
 
                                     //#endregion -----------------------------------------------------------------------------------------------------
                                 //====================================================================================================================
@@ -599,6 +617,7 @@ var showTitle = false;
                                 //====================================================================================================================
                                     //#region FORMAT CELLS IN THE CUSTOM BREAKOUT TABLES -------------------------------------------------------------
 
+
                                         let theMissingFormat = styleCells(
                                             missingTable.table, missingFormatting, missingRowCount.value, masterHeader, "MISSING"
                                         );
@@ -611,12 +630,19 @@ var showTitle = false;
                                         let theDigitalFormat = styleCells(
                                             digitalTable.table, digitalFormatting, digitalRowCount.value, masterHeader, "DIGITAL"
                                         );
+
+                                        context.workbook.tables.getItem("Digital").sort.apply([
+                                            { key: 0, ascending: true } // '0' is the column number for 'Form'
+                                        ]);
+                                        
                                         /* let theShippingFormat = styleCells(
                                             shippingTable.table, shippingFormatting, shippingRowCount.value, masterHeader, "Shipping"
                                         );*/
 
                                     //#endregion -----------------------------------------------------------------------------------------------------
                                 //====================================================================================================================
+
+                                await context.sync();
 
                                 //====================================================================================================================
                                     //#region HIDE CERTAIN COLUMNS IN THE CUSTOM BREAKOUTS -----------------------------------------------------------
@@ -734,11 +760,23 @@ var showTitle = false;
 
                                                 //====================================================================================================
                                                     //#region FORMAT CELLS IN TYPE BREAKOUT ----------------------------------------------------------
-
                                                         let theNormalFormat = styleCells(
                                                             thisTable.table, globalVar.normalBreakoutsFormatting[line], normalRowCount.value, 
                                                             masterHeader, tableName
                                                         );
+
+                                                        if (tableName.match(/\bDIGITAL\b/gi)){
+                                                            context.workbook.tables.getItem("Digital").sort.apply([
+                                                                { key: 0, ascending: true } // '0' is the column number for 'Form'
+                                                            ]);
+                                                        } else if (tableName== "Fold Only"){
+                                                            context.workbook.tables.getItem("FoldOnly").sort.apply([
+                                                                { key: 5, ascending: true }, // '5' is the column number for 'product'
+                                                                { key: 6, ascending: true },  // '6' is the column number for 'company'
+                                                                { key: 3, ascending: true },  // '3' is the column number for 'code'
+                                                            ]);
+                                                        }
+                                                        
                                                         await context.sync();
 
                                                     //#endregion -------------------------------------------------------------------------------------
@@ -811,13 +849,20 @@ var showTitle = false;
                                 //====================================================================================================================
                                     //#region FORMAT SHIPPING BREAKOUT -------------------------------------------------------------------------------
 
-                                        let theShippingFormat = styleCells(
-                                            shippingTable.table, shippingFormatting, shippingRowCount.value, masterHeader, "Shipping"
-                                        );
+                                       
+                                            let theShippingFormat = styleCells(
+                                                shippingTable.table, shippingFormatting, shippingRowCount.value, masterHeader, "Shipping"
+                                            );
+
+                                            context.workbook.tables.getItem("Shipping").sort.apply([
+                                                { key: 0, ascending: true } // '0' is the column number for 'Form'
+                                            ]);
+                                        
 
                                     //#endregion -----------------------------------------------------------------------------------------------------
                                 //====================================================================================================================
 
+                                await context.sync();
                                 //====================================================================================================================
                                     //#region HIDE CERTAIN COLUMNS IN SHIPPING BREAKOUT --------------------------------------------------------------
                                 
@@ -928,47 +973,98 @@ var showTitle = false;
             };
 
             for (let u = 0; u < rowCount; u++) {
+                //the problem is the u variable being 1 ahead of the v variable
 
                 try {
 
+
                     let arrRow = formattingArr[u];
+
+                    let currentRow = formattingArr[u]['UJID'].formsValue;
 
                     let thisRow = table.rows.getItemAt(u).getRange();
 
+                    let rowProperties = "";
+
+                    // Functional Array Method ↓
+                    // arr.find(v => itemRow === targetValue) ; → [{... found value}]
+                    // let foundValue = Find the item in globalVar.masterCellData where itemRow == targetValue
+                    // let cell = thisRow.getCell(0, v).load("address");
+                    // cell.format.fill ...
 
 
 
-                    for (let v = 0; v < headerValues.length; v++) {
+                    let rowFormats = globalVar.masterCellData[currentRow];
 
-                        try {
-                            let cell = thisRow.getCell(0, v).load("address");
-                            cell.format.fill.color = arrRow[headerValues[v]].formsFill;
-                            cell.format.font.color = arrRow[headerValues[v]].formsFontColor;
-                            cell.format.font.bold = arrRow[headerValues[v]].formsFontBold;
-                            cell.format.font.italic = arrRow[headerValues[v]].formsFontItalic;
-                            cell.format.wrapText = true;
+                    // Using the headerValues variable because its index will always match the column number.
+                    rowFormats.forEach((cell, i)=>{
+                        // Take thisRow
+                        let unFormatted = thisRow.getCell(0, i).load("address"); // An Unformatted cell.
+                        let currentCellProps = cell.cellProps.value[0][0];
+
+                        unFormatted.format.fill.color = currentCellProps.format.fill.color;
+                        unFormatted.format.font.color = currentCellProps.format.font.color;
+                        unFormatted.format.font.bold = currentCellProps.format.font.bold;
+                        unFormatted.format.font.italic = currentCellProps.format.font.italic;
+                        unFormatted.format.wrapText = true;
+                    });
+
+                    //use the newProperties below instead of arrRow[headerValues[v]]
 
 
-                            tempObj = {
-                                sheet: sheetName,
-                                index: u,
-                                cell: cell,
-                                fill: arrRow[headerValues[v]].formsFill,
-                                fontColor: arrRow[headerValues[v]].formsFontColor,
-                                fontBold: arrRow[headerValues[v]].formsFontBold,
-                                fontItalic: arrRow[headerValues[v]].formsFontItalic,
-                                wrapText: true,
-                            };
 
-                            allFormattedCells.push(tempObj);
 
-                        } catch (e) {
-                            // console.log(`The value of v at error: ${v}`);
-                            console.log(e);
-                            loadError(e.stack)
-                        };
 
-                    };
+
+                    // for (let v = 0; v < headerValues.length; v++) {
+
+                    //     try {
+                    //         // let cell = thisRow.getCell(0, v).load("address");
+                    //         // cell.format.fill.color = arrRow[headerValues[v]].formsFill;
+                    //         // cell.format.font.color = arrRow[headerValues[v]].formsFontColor;
+                    //         // cell.format.font.bold = arrRow[headerValues[v]].formsFontBold;
+                    //         // cell.format.font.italic = arrRow[headerValues[v]].formsFontItalic;
+                    //         // cell.format.wrapText = true;
+
+                    //         let cell = thisRow.getCell(0, v).load("address");
+                    //         cell.format.fill.color = rowProperties.format.fill.color;
+                    //         cell.format.font.color = rowProperties.format.font.color;
+                    //         cell.format.font.bold = rowProperties.format.font.bold;
+                    //         cell.format.font.italic = rowProperties.format.font.italic;
+                    //         cell.format.wrapText = true;
+
+
+                    //         // tempObj = {
+                    //         //     sheet: sheetName,
+                    //         //     index: u,
+                    //         //     cell: cell,
+                    //         //     fill: arrRow[headerValues[v]].formsFill,
+                    //         //     fontColor: arrRow[headerValues[v]].formsFontColor,
+                    //         //     fontBold: arrRow[headerValues[v]].formsFontBold,
+                    //         //     fontItalic: arrRow[headerValues[v]].formsFontItalic,
+                    //         //     wrapText: true,
+                    //         // };
+
+                    //         tempObj = {
+                    //             sheet: sheetName,
+                    //             index: u,
+                    //             cell: cell,
+                    //             fill: rowProperties.format.fill.color,
+                    //             fontColor: rowProperties.format.font.color,
+                    //             fontBold: rowProperties.format.font.bold,
+                    //             fontItalic: rowProperties.format.font.italic,
+                    //             wrapText: true,
+                    //         };
+
+                    //         allFormattedCells.push(tempObj);
+
+                    //     } catch (e) {
+                    //         // console.log(`The value of v at error: ${v}`);
+                    //         console.log(e);
+                    //         loadError(e.stack)
+                    //     };
+
+                    // };
                 } catch (e) {
                     console.log(e);
                     loadError(e.stack)
@@ -1161,24 +1257,7 @@ function printSettings(sheet) {
             });            
 
              // Have Digital and Shipping Breakouts sorted by Form numbers. For Fold Only Breakout, sort by product, then by company
-             if (line == "Fold Only") {
-                 const foldTable = sheet.tables.getItem("FoldOnly");
-
-                 // Apply the sort
-                 foldTable.sort.apply([
-                     { key: 5, ascending: true }, // '5' is the column number for 'product'
-                     { key: 6, ascending: true },  // '6' is the column number for 'company'
-                     { key: 3, ascending: true },  // '3' is the column number for 'code'
-                 ]);
-
-             }
-             else if (line == "DIGITAL" || line == "Shipping") {
-                 const digiTable = sheet.tables.getItem(tableName);
-                 digiTable.sort.apply([
-                     { key: 0, ascending: true } // '0' is the column number for 'Form'
-                 ]);
-
-             }
+             
 
             // Move Z-shelf to the bottom.
             let indexes = []
@@ -1208,6 +1287,11 @@ function printSettings(sheet) {
             if (elementsToMove.length > 0) {
                 formattingRows.push(...elementsToMove);
             }             
+
+            // Post sort. format.
+            // masterRowInfo['UJID'].value
+
+
 
             sheet.activate();
 
@@ -1288,6 +1372,7 @@ function printSettings(sheet) {
                 console.log("letting user handle...");
                 showTitle = false;
                 $("#empty-background").css("display", "none");
+                activateEvents();
             });
 
         };

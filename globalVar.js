@@ -26,7 +26,7 @@
     scrollHeight: undefined,
     listOfBreakoutTables:[],
     emptySheets:[],
-    normalBreakoutsFormatting: {},
+    normalBreakoutsFormatting: [],
     hiddenLinesData: ["MISSING", "IGNORE", "Shipping", "Empty", "PRINTED", "DIGITAL"],
     priorityNum: 1,
     singleSided: false,
@@ -38,7 +38,8 @@
     pressmen:[" "],
     presses:[" "],
     daysOfWeek: [" ", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-    headerPrefix: ""
+    headerPrefix: "",
+    masterCellData: {}
     //pressmen: [" ", "Steve", "Roberto", "Ryan", "Jamie", "Cody", "Terry", "Paul"],
     //presses: [" ", 1, 2, 3, 4, "Digital 1", "Digital 2"]
 }
