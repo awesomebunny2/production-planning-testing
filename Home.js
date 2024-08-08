@@ -703,9 +703,10 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
                         // let changedRange = changedWorksheet.getRange(address);
                         try {
                             await Excel.run(async (context) => {
-                                let tableNamesToUpdate = ["MISSING", "Shipping"];
-                                let columnBTableName = changedRow.values[0][1]; // Assuming column B is at index 1
-                                
+                                let tableNamesToUpdate = ["MISSING", "Shipping", "PRINTED", "IGNORE", "DIGITAL"]; /* Just look through these in all 
+                                                                                                                     updates just in case. */
+                                let columnBTableName = changedRow.values[0][1]; // It's ok if it updates twice-- That won't harm anything.
+
                                 // Add the table from column B to the list of tables to update
                                 tableNamesToUpdate.push(columnBTableName);
                                 
@@ -777,25 +778,45 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
 
                             moveTables(tableName, eventArgs.details.valueAfter, changedRow); // changedRow.values[0][1] = Column B
 
-                        } else if (['MISSING', 'DIGITAL', 'PRINTED', 'ZSHELF', 'UA'].includes(eventArgs.details.valueAfter)){
+                        } else if (['MISSING', 'DIGITAL', 'ZSHELF', 'UA'].includes(eventArgs.details.valueAfter)){
                             // Move to table that matches Column A.
                             // Also move to table that matches Column B.
-                            console.log("Changing to Missing, Digital, Printed or UA.");
-                            console.log("Changing specifically from:", tableAndSheetNames[tableName], "| Changing to:", tableAndSheetNames[eventArgs.details.valueAfter])
                             await moveTables(tableName, eventArgs.details.valueAfter, changedRow);
 
-                            //try{
-                            //    moveTables(eventArgs.details.valueBefore, eventArgs.details.valueAfter, changedRow);
-                            //} catch(e){
-                            //    console.log("Maybe column A is just a number?")
-                            //}
+                        }
+                        else if(eventArgs.details.valueAfter == "PRINTED"){
+                            /* 
+                                If you update a form number to "PRINTED", it should update the data in the breakout sheet and also update the data in 
+                                the printed table.
+                            */
+
+                            updateTable(changedRow);
+                            let changedSheet= context.workbook.worksheets.getItem(tableName);
+                            const newWorksheet = context.workbook.worksheets.getItem(eventArgs.details.valueAfter);
+                            const newTable = newWorksheet.tables.getItem(tableAndSheetNames[eventArgs.details.valueAfter]);
+                            // Get the unique identifier from the changedRow (22nd key)
+                            const uniqueIdentifier = changedRow.values[0][21]; // Index 21 corresponds to the 22nd column
+
+                            // Load the rows from the newTable
+                            newTable.rows.load("items");
+                            await context.sync(); // Ensure the rows are loaded
                             
+
+                            // Check if the unique identifier exists in newTable
+                            let rowExists = newTable.rows.items.some(row => row.values[0][21] === uniqueIdentifier);
+
+                            if (!rowExists) {
+                                console.log("Adding this row to:", tableName)
+                                // If the row does not exist, add it to the newTable
+                                newTable.rows.add(null, [changedRow.values[0]]);
+                                await context.sync(); // Synchronize the changes
+                            }
+                            conditionalFormatting(changedSheet, changedSheet.getRange(`A${rowNum}:W${rowNum}`), changedRow, null);
 
                         }
                         else {
                             // Move to table that matches Column B
                             // Get value of Column A before change and delete line from this table
-                            console.log("Changing to a number...?", tableName);
                             updateTable(changedRow);
                             let prevTable = eventArgs.details.valueBefore == "" ? "MISSING" : eventArgs.details.valueBefore;
                             const oldWorksheet = context.workbook.worksheets.getItem(prevTable);

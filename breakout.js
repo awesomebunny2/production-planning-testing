@@ -612,23 +612,67 @@ var showTitle = false;
                                     //#endregion -----------------------------------------------------------------------------------------------------
                                 //====================================================================================================================
 
+                                let missingSortedValues = missingTable.table.getDataBodyRange().load("values");
+                                let printedSortedValues = printedTable.table.getDataBodyRange().load("values");
+                                let ignoreSortedValues = ignoreTable.table.getDataBodyRange().load("values");
+                                let digitalSortedValues = digitalTable.table.getDataBodyRange().load("values");
+
+
                                 await context.sync();
+
+                                let missingSorted = missingSortedValues.values;
+                                let printedSorted = printedSortedValues.values;
+                                let ignoreSorted = ignoreSortedValues.values;
+                                let digitalSorted = digitalSortedValues.values;
+
+
+                                let missingSortedTableData = missingSorted.map(row => {
+                                    let obj = {};
+                                    row.forEach((cell, index) => {
+                                        obj[masterHeader[0][index]] = cell;
+                                    });
+                                    return obj;
+                                });
+
+                                let printedSortedTableData = printedSorted.map(row => {
+                                    let obj = {};
+                                    row.forEach((cell, index) => {
+                                        obj[masterHeader[0][index]] = cell;
+                                    });
+                                    return obj;
+                                });
+
+                                let ignoreSortedTableData = ignoreSorted.map(row => {
+                                    let obj = {};
+                                    row.forEach((cell, index) => {
+                                        obj[masterHeader[0][index]] = cell;
+                                    });
+                                    return obj;
+                                });
+
+                                let digitalSortedTableData = digitalSorted.map(row => {
+                                    let obj = {};
+                                    row.forEach((cell, index) => {
+                                        obj[masterHeader[0][index]] = cell;
+                                    });
+                                    return obj;
+                                });
 
                                 //====================================================================================================================
                                     //#region FORMAT CELLS IN THE CUSTOM BREAKOUT TABLES -------------------------------------------------------------
 
 
                                         let theMissingFormat = styleCells(
-                                            missingTable.table, missingFormatting, missingRowCount.value, masterHeader, "MISSING"
+                                            missingTable.table, missingFormatting, missingRowCount.value, masterHeader, "MISSING", missingSortedTableData
                                         );
                                         let thePrintedFormat = styleCells(
-                                            printedTable.table, printedFormatting, printedRowCount.value, masterHeader, "PRINTED"
+                                            printedTable.table, printedFormatting, printedRowCount.value, masterHeader, "PRINTED", printedSortedTableData
                                         );
                                         let theIgnoreFormat = styleCells(
-                                            ignoreTable.table, ignoreFormatting, ignoreRowCount.value, masterHeader, "IGNORE"
+                                            ignoreTable.table, ignoreFormatting, ignoreRowCount.value, masterHeader, "IGNORE", ignoreSortedTableData
                                         );
                                         let theDigitalFormat = styleCells(
-                                            digitalTable.table, digitalFormatting, digitalRowCount.value, masterHeader, "DIGITAL"
+                                            digitalTable.table, digitalFormatting, digitalRowCount.value, masterHeader, "DIGITAL", digitalSortedTableData
                                         );
 
                                         context.workbook.tables.getItem("Digital").sort.apply([
@@ -756,13 +800,26 @@ var showTitle = false;
                                                     //#endregion -------------------------------------------------------------------------------------
                                                 //====================================================================================================
 
+                                                let tableSortedValues = thisTable.table.getDataBodyRange().load("values");
+
+
                                                 await context.sync();
+
+                                                let sortedValues = tableSortedValues.values;
+
+                                                let sortedTableData = sortedValues.map(row => {
+                                                    let obj = {};
+                                                    row.forEach((cell, index) => {
+                                                        obj[masterHeader[0][index]] = cell;
+                                                    });
+                                                    return obj;
+                                                });
 
                                                 //====================================================================================================
                                                     //#region FORMAT CELLS IN TYPE BREAKOUT ----------------------------------------------------------
                                                         let theNormalFormat = styleCells(
                                                             thisTable.table, globalVar.normalBreakoutsFormatting[line], normalRowCount.value, 
-                                                            masterHeader, tableName
+                                                            masterHeader, tableName, sortedTableData
                                                         );
 
                                                         if (tableName.match(/\bDIGITAL\b/gi)){
@@ -844,14 +901,27 @@ var showTitle = false;
                                     //#endregion -----------------------------------------------------------------------------------------------------
                                 //====================================================================================================================
 
+
+                                let shippingSortedValues = shippingTable.table.getDataBodyRange().load("values");
+
                                 await context.sync();
+
+                                let shippingSorted = shippingSortedValues.values;
+
+                                let shippingSortedTableData = shippingSorted.map(row => {
+                                    let obj = {};
+                                    row.forEach((cell, index) => {
+                                        obj[masterHeader[0][index]] = cell;
+                                    });
+                                    return obj;
+                                });
 
                                 //====================================================================================================================
                                     //#region FORMAT SHIPPING BREAKOUT -------------------------------------------------------------------------------
 
                                        
                                             let theShippingFormat = styleCells(
-                                                shippingTable.table, shippingFormatting, shippingRowCount.value, masterHeader, "Shipping"
+                                                shippingTable.table, shippingFormatting, shippingRowCount.value, masterHeader, "Shipping", shippingSortedTableData
                                             );
 
                                             context.workbook.tables.getItem("Shipping").sort.apply([
@@ -960,7 +1030,12 @@ var showTitle = false;
          * @param {String} sheetName The name of the table
          * @returns An array of objects
          */  
-        function styleCells(table, formattingArr, rowCount, headerValues, sheetName) {
+        function styleCells(table, formattingArr, rowCount, headerValues, sheetName, sortedData) {
+
+
+            if (sheetName == "PlasticLine") {
+                console.log("PLASTIC!");
+            };
 
             let tempObj = {};
 
@@ -978,11 +1053,20 @@ var showTitle = false;
                 try {
 
 
-                    let arrRow = formattingArr[u];
+                    //let arrRow = formattingArr[u];
 
-                    let currentRow = formattingArr[u]['UJID'].formsValue;
+                    //let currentRow = formattingArr[u]['UJID'].formsValue;
 
                     let thisRow = table.rows.getItemAt(u).getRange();
+
+                    let currentRow = sortedData[u]['UJID'];
+            
+
+
+                    //! The first row in the formattingArr is actually the second row in the table for some reason (the first row seems to be missing)
+                    //! thisRow is getting the first row in the table, so the wrong formatting is being applied to the first row it seems
+
+                    //! Also formattingArr is not sorted like the actual table is, so a Z-Shelf item that is at the bottom of the excel table is not in the formattingArr
 
                     let rowProperties = "";
 
@@ -1132,6 +1216,10 @@ function printSettings(sheet) {
          * @returns 
          */
          function addSheetAndTable(line, allSheets, filteredData, masterHeader, tableName, masterRowInfo) {
+
+             if (line == "Plastic Line") {
+                 console.log("Break here");
+             };
 
             let table = "";
             let tableColumnLetter = "";
