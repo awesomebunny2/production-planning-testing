@@ -193,54 +193,64 @@ import globalVar from "./globalVar.js";
             //     rowArr=[];
             // }
 
-            let columnIndex = findColumnIndex(head, columnName);
+            try {
 
-            let value = rowValues[columnIndex];
+                //if (copyTable == null) {
+                //    console.log("Poop");
+                //}
 
-            let cell = worksheet.getCell(rowIndex, columnIndex);
-            
-            const cellProps = cell.getCellProperties({
-                address: true,
-                format: {
-                    fill: {
-                        color: true
+                let columnIndex = findColumnIndex(head, columnName);
+
+                let value = rowValues[columnIndex];
+
+                let cell = worksheet.getCell(rowIndex, columnIndex);
+
+                const cellProps = cell.getCellProperties({
+                    address: true,
+                    format: {
+                        fill: {
+                            color: true
+                        },
+                        font: {
+                            color: true,
+                            bold: true,
+                            italic: true
+                        }
                     },
-                    font: {
-                        color: true,
-                        bold: true,
-                        italic: true
-                    }
-                },
-                style: true
-            });
+                    style: true
+                });
 
-               //[ length of 22
-                    //{value: "", cellProps: ""} cell1
-                    //{value: "", cellProps: ""} cell2
-                    //{value: "", cellProps: ""} cell3
+                //[ length of 22
+                //{value: "", cellProps: ""} cell1
+                //{value: "", cellProps: ""} cell2
+                //{value: "", cellProps: ""} cell3
                 //]
 
-            if (toBeReturned){
+                if (toBeReturned) {
 
 
-                return {
-                    columnIndex,
-                    value,
-                    cellProps
-                };
+                    return {
+                        columnIndex,
+                        value,
+                        cellProps
+                    };
 
-                // rowArr.push(newObj);
+                    // rowArr.push(newObj);
 
-                // obj[columnName] = rowArr;
+                    // obj[columnName] = rowArr;
 
-                // return 
-            } else {
-                obj[columnName] = {
-                    columnIndex,
-                    value,
-                    cellProps
-                };
-            }
+                    // return 
+                } else {
+                    obj[columnName] = {
+                        columnIndex,
+                        value,
+                        cellProps
+                    };
+                }
+            } catch (e) {
+                console.log(e);
+            };
+
             
         };
 

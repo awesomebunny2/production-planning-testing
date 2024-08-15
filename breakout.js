@@ -230,7 +230,7 @@ var showTitle = false;
 
                                 for (let row of masterArr){
 
-                                    let rowUjid= row[22];
+                                    let rowUjid= row[masterHeader[0].indexOf("UJID")];
 
                                     let rowArr = [];
 
@@ -288,7 +288,6 @@ var showTitle = false;
                                             let masterNotesColumnIndex = masterRowInfo["Notes"].columnIndex;
 
                                             let masterNotes = masterRowInfo["Notes"].value;
-                                            let masterOptions = masterRowInfo["Options"].value;
                                             let masterVersionNo = masterRowInfo["Version No"].value;
 
                                         //#endregion -------------------------------------------------------------------------------------------------
@@ -301,12 +300,10 @@ var showTitle = false;
                                                 Explanation: This makes and array and joins the array based on how many items get added. This keeps 
                                                 the notes from having random " - " bits stuck on the end.
                                             */
-                                            let arrayKeys = ["Notes", "Options", "Version No"]
                                             let notesArr = new Array(); 
-                                            notesArr.push(masterNotes);
 
-                                            if (!/^(?:\s|,|\s*,\s*)$/.test(masterOptions)) {
-                                                notesArr.push(masterOptions);
+                                            if (!(/^(?:\s|,|\s*,\s*)$/.test(masterNotes))) {
+                                                notesArr.push(masterNotes);
                                             }
  
                                             if (!masterVersionNo.replace(/ /g, "") == "") {
@@ -376,7 +373,8 @@ var showTitle = false;
                                                 //====================================================================================================
                                                     //#region PUSH TO SHIPPING BREAKOUT --------------------------------------------------------------
 
-                                                        if (masterType == "Shipping" && (masterForms !== "IGNORE")) { //if type is shipping, push to just shipping array
+                                                        if (masterType == "Shipping" && (masterForms !== "IGNORE")) { 
+                                                            //if type is shipping, push to just shipping array
 
                                                             shipping.push(masterRow);
                                                             shippingFormatting.push(formsObjCopy);
@@ -1171,33 +1169,36 @@ var showTitle = false;
          * @param {Excel Sheet Object} sheet The sheet that you wish to apply print settings to
          */
 function printSettings(sheet) {
-            /*
-            Currently they are vertically & horizontally centered. Just keep horizontal, remove vertical centering. Also change Margin Top to 0.5� and Margin Bottom to 0.25�
-            */
-            sheet.pageLayout.rightMargin = 0;
-            sheet.pageLayout.leftMargin = 0;
-            sheet.pageLayout.topMargin = 0.5;
-            sheet.pageLayout.bottomMargin = 0.25;
-            sheet.pageLayout.headerMargin = 0;
-            sheet.pageLayout.footerMargin = 0;
+    const points = 72; // 72 points in an inch
+    /*
+    Currently they are vertically & horizontally centered. Just keep horizontal, remove vertical centering. Also change Margin Top to 0.5� and Margin Bottom to 0.25�
+    */
+    sheet.pageLayout.rightMargin = 0;
+    sheet.pageLayout.leftMargin = 0;
+    sheet.pageLayout.topMargin = 0.5 * points;
+    sheet.pageLayout.bottomMargin = 0.25 * points;
+    sheet.pageLayout.headerMargin = 0;
+    sheet.pageLayout.footerMargin = 0;
 
-            sheet.pageLayout.paperSize = "Legal";
+    sheet.pageLayout.paperSize = "Legal";
 
-            sheet.pageLayout.centerHorizontally = true;
-            sheet.pageLayout.centerVertically = false;
+    sheet.pageLayout.centerHorizontally = true;
+    sheet.pageLayout.centerVertically = false;
 
-            let pageLayoutZoomOptions = {
-                'horizontalFitToPages': 1,
-                'verticalFitToPages': 0,
-            };
+    let pageLayoutZoomOptions = {
+        'horizontalFitToPages': 1,
+        'verticalFitToPages': 0,
+    };
 
-            sheet.pageLayout.zoom = pageLayoutZoomOptions;
+    sheet.pageLayout.zoom = pageLayoutZoomOptions;
 
-            // Set the first row as the title row for every page.
-            sheet.pageLayout.setPrintTitleRows("$2:$2");
+    // Set the first row as the title row for every page.
+    sheet.pageLayout.setPrintTitleRows("$2:$2");
 
-            sheet.pageLayout.orientation = Excel.PageOrientation.landscape;
-        };
+    sheet.pageLayout.orientation = Excel.PageOrientation.landscape;
+
+    sheet.pageLayout.printGridlines= true;
+}
 
     //#endregion -------------------------------------------------------------------------------------------------------------------------------------
 //====================================================================================================================================================
@@ -1216,10 +1217,6 @@ function printSettings(sheet) {
          * @returns 
          */
          function addSheetAndTable(line, allSheets, filteredData, masterHeader, tableName, masterRowInfo) {
-
-             if (line == "Plastic Line") {
-                 console.log("Break here");
-             };
 
             let table = "";
             let tableColumnLetter = "";
@@ -1296,7 +1293,7 @@ function printSettings(sheet) {
             let rangeV = sheet.getRange("V1"); // Stretch out UPS Info
             rangeV.format.columnWidth = 90;
 
-            let rangeW = sheet.getRange("W1"); // Stretch out UPS Info
+            let rangeW = sheet.getRange("W1"); // Stretch out UJID Info
             rangeW.format.columnWidth = 80;
 
 
@@ -1305,6 +1302,8 @@ function printSettings(sheet) {
 
             rangeA_E.format.horizontalAlignment = "Center";
             rangeJ_Q.format.horizontalAlignment = "Center";
+
+            sheet.getRange(`A:W`).format.verticalAlignment="center";
 
             //if the table data for the line is empty, push the empty sheet and table variables to the sheetAndTable object for referencing later
             if (currentSheet == "") {
@@ -1317,17 +1316,19 @@ function printSettings(sheet) {
             // MA/UA Sort ----------------------------------------------------------------------------------------------------------------------------
             let uaRows = currentSheet.filter(row => row[0]=="UA");
 
+
             uaRows.forEach(row => {
 
                 // Remove this row from currentSheet
                 currentSheet.splice(currentSheet.indexOf(row), 1)
 
-                // Get the target row from 4th col
-                let ref = row[18].split("-")[1]
+                let versionRef = row[masterHeader[0].indexOf("Version No")].split("-")[1];
+                let notesRef = row[masterHeader[0].indexOf("Notes")].split("-")[1];
+                let codeColumn = row[masterHeader[0].indexOf("Code")];
 
 
                 // Find the row in currentSheet that has the ref value as the 3rd index
-                let refRow = currentSheet.find(row => row[4] === Number(ref))
+                let refRow = currentSheet.find(row => (row[codeColumn] === Number(versionRef) || row[codeColumn] === Number(notesRef)))
                 let targetIndex = currentSheet.indexOf(refRow)
                 // Add this row after the row at the target index
                 currentSheet.splice(targetIndex + 1, 0, row)
@@ -1338,11 +1339,11 @@ function printSettings(sheet) {
             table.rows.add(null /*add rows t o the end of the table*/, currentSheet);
 
             // Type (B), EDDM (P), Order Status (Q), Version No (S), Artwork (T), Options (U), & UJID (W)
-            const columnsToHide = ['B', 'P', 'Q', 'S', 'T', 'U', 'W'];
-            columnsToHide.forEach(column => {
-                const hideRange = sheet.getRange(`${column}:${column}`);
-                hideRange.columnHidden = true;
-            });            
+            // const columnsToHide = ['B', 'P', 'Q', 'S', 'T', 'U', 'W'];
+            // columnsToHide.forEach(column => {
+            //     const hideRange = sheet.getRange(`${column}:${column}`);
+            //     hideRange.columnHidden = true;
+            // });            
 
              // Have Digital and Shipping Breakouts sorted by Form numbers. For Fold Only Breakout, sort by product, then by company
              

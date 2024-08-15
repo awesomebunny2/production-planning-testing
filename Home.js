@@ -30,21 +30,6 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
 */
 
 
-// ===================================================================================================================================================
-    //#region Between Form Number Logic --------------------------------------------------------------------------------------------------------------
-        /**
-         * Determines if the form number is in range of min and max.
-         * @param {Number} min The beginning of the form range
-         * @param {Number} max The end of the form range
-         * @param {Number} test Current form number
-         * @returns {Boolean} True/False
-         */
-        function isBetween(min, max, test) {
-            return Number(test) > min && Number(test) < max;
-        }
-    //#endregion -------------------------------------------------------------------------------------------------------------------------------------
-// ===================================================================================================================================================
-
     //#region ----------------------------------------------------------------------------------------------------------------------------------------
 
         Office.onReady((info) => {
@@ -154,7 +139,7 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
                             const msweek = document.querySelector("#msweek").value || "";
                             const preview = document.querySelector("#preview"); 
 
-                            // The {var == "" ? "": " "} is to determine if a space needs added or not. If one of these is blank, we don't want extra spaces. Looks nasty, sorry! - Danny
+                            // The {var == "" ? "": " "} is to determine if a space needs added or not. If one of these is blank, we don't want extra spaces. Looks nasty, sorry!  Danny
                             preview.value= `(${print}) GRP ${group} WK ${week} INK ${inkstart} THRU ${inkend} / MAILS ${msweek} /`
                         }
 
@@ -230,7 +215,7 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
                 //====================================================================================================================================
 
                 //====================================================================================================================================
-                    // #region UPDATE BREAKOUT BUTTON TEXT --------------------------------------------------------------------------------------------
+                    // #region UPDATE BREAKOUT BUTTON TEXT -------------------------------------------------------------------------------------------
 
                         let missingExist = false;
 
@@ -249,7 +234,7 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
                             $("#breakout").text("Breakout");
                         };
 
-                    // #endregion ---------------------------------------------------------------------------------------------------------------------
+                    // #endregion --------------------------------------------------------------------------------------------------------------------
                 //====================================================================================================================================
 
                 //====================================================================================================================================
@@ -623,241 +608,13 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
                 //====================================================================================================================================
 
 
-                //====================================================================================================================================
-                // #region TABLE CHANGE EVENTS -------------------------------------------------------------------------------------------------------
-
-                function isBetweenInclusive(x, y, z) {
-                    return x <= y && y <= z;
-                    }
-
-                const tableAndSheetNames = {
-                    // Key = Worksheet Name.
-                    // Value: Table Name.
-                    "MISSING": "Missing",
-                    "Missing": "Missing", // Just in case
-                    "PRINTED": "Printed",
-                    "IGNORE": "Ignore",
-                    "DIGITAL": "Digital",
-                    "Postcard": "Postcard",
-                    "Scratch Off-Line": "ScratchoffLine",
-                    "Magnet Line": "MagnetLine",
-                    "Colossal": "Colossal",
-                    "MENU": "Menu",
-                    "Fold Only": "FoldOnly",
-                    "XL Ink Line": "XlInkLine",
-                    "MS-BS Flyer Line": "MsbsFlyerLine",
-                    "Plastic Line": "PlasticLine",
-                    "Envelope Inserter": "EnvelopeInserter",
-                    "Heidelberg Die-Cutter": "HeidelbergDiecutter",
-                    "Flatbed Die-Cutter": "FlatbedDiecutter",
-                    "MF Ink Line": "MfInkLine",
-                    "Apparel": "Apparel",
-                    "APPAREL": "Apparel", // For the Forms thing.
-                    "All Other": "AllOther",
-                    "Shipping": "Shipping"
-                }
-
-                masterTable.onChanged.add(async function(eventArgs){
-
-                    // ===============================================================================================================================
-                    async function moveTables(oldTableName, newTableName, changedRow) {
-                        if (!(tableAndSheetNames[newTableName].match(/\bMISSING\b/gi) )){
-                            // Remove from the Missing Table, if we're not moving to Missing. 
-                            // Doing this purely to account for items that may be in a product table and also the Missing table.
-                            for (let i = 0; i < missingRows.values.length; i++) {
-                                if (missingRows.values[i][22] === changedRow.values[0][22]) { 
-                                    missingTable.rows.getItemAt(i).delete();
-                                break;
-                                }
-                            }
-                        }
-                        
-                        
-                    
-                        const oldWorksheet = context.workbook.worksheets.getItem(oldTableName);
-                        const oldTable = oldWorksheet.tables.getItem(tableAndSheetNames[oldTableName]);
-                        const oldRows = oldTable.getDataBodyRange().load("values"); 
-                        await context.sync(); // <-- Error but only if the new value is Missing???
-                        for (let i = 0; i < oldRows.values.length; i++) {
-                            if (oldRows.values[i][22] === changedRow.values[0][22]) {
-                                oldTable.rows.getItemAt(i).delete();
-                            break;
-                            }
-                        }
-                    
-                        // Step 2: Add the row to the new worksheet
-                        const newWorksheet = context.workbook.worksheets.getItem(newTableName);
-                        const newTable = newWorksheet.tables.getItem(tableAndSheetNames[newTableName]);
-
-                        
-                        // Add the changed row to the new worksheet
-                        newTable.rows.add(null, [changedRow.values[0]]);
-                        await context.sync();
-                        console.log(`Row moved from ${oldTableName} to ${tableAndSheetNames[newTableName]}`);
-                        // End Move Table Function
-                    }
-
-                    
-                    async function updateTable(changedRow) {
-                        // let address = event.address;
-                        // let changedRange = changedWorksheet.getRange(address);
-                        try {
-                            await Excel.run(async (context) => {
-                                let tableNamesToUpdate = ["MISSING", "Shipping", "PRINTED", "IGNORE", "DIGITAL"]; /* Just look through these in all 
-                                                                                                                     updates just in case. */
-                                let columnBTableName = changedRow.values[0][1]; // It's ok if it updates twice-- That won't harm anything.
-
-                                // Add the table from column B to the list of tables to update
-                                tableNamesToUpdate.push(columnBTableName);
-                                
-                                for (let name of tableNamesToUpdate) {
-                                    try {
-                                        let changedProductTable = context.workbook.tables.getItem(tableAndSheetNames[name]);
-                                        let dataBodyRange = changedProductTable.getDataBodyRange();
-                                        // Queue a command to load the 'values' property for the dataBodyRange
-                                        dataBodyRange.load("values");
-                                        // Run the queued commands, and return a promise to indicate task completion
-                                        await context.sync();
-                                        
-                                        let newTableData = dataBodyRange.values.map((row, index) => {
-                                            if (row[22] == changedRow.values[0][22]) {
-                                                return changedRow.values[0];
-                                            }
-                                            return row;
-                                        });
-                                        
-                                        // Get the range again to update the values
-                                        // Set the values for the range
-                                        changedProductTable.getDataBodyRange().values = newTableData;
-                                        // Run the queued commands, and return a promise to indicate task completion
-                                        await context.sync();
-                                        
-                                    } catch (e) {
-                                        console.error(e);
-                                    }
-                                }
-                            });
-                        } catch (error) {
-                            console.error(error);
-                        }
-
-                        // End of Update Table Function
-                    }
-                    
-                    // ===============================================================================================================================
-
-                    console.log("Type Before:", eventArgs.details.valueTypeBefore);
-
-
-                    let sheet = context.workbook.worksheets.getActiveWorksheet();
-                    var rowNum = eventArgs.address.replace(/\D/g, '');
-                    var changedRow = sheet.getRange(`A${rowNum}:W${rowNum}`).load('values');
-                    // ---- //
-                    const missingWorksheet = context.workbook.worksheets.getItem("MISSING");
-                    const missingTable = missingWorksheet.tables.getItem("Missing");
-                    const missingRows = missingTable.getDataBodyRange().load("values");
-                    await context.sync();
-
-                    let tableName = changedRow.values[0][1];
-
-                    if (eventArgs.details.valueBefore == eventArgs.details.valueAfter) {
-                        console.log("onTableChange was triggered, but the value was not changed, so doing nothing...");
-                        return;
-                    };
-
-                    if (eventArgs.address.match(/A\d+/g)){
-                        // Changing Column A/Form type
-                        if (eventArgs.details.valueTypeAfter=="Empty"){
-                            // Cleared Column A. Don't worry about doing anything.
-                            console.log("Column A is now blank.")
-                            return;
-                        } else if (['IGNORE', 'APPAREL'].includes(eventArgs.details.valueAfter)){
-                            // Move to table that matches Column A
-                            // Delete line from Column B's table if it exists there currently
-                            console.log("Changing to Ignore or Apparel.");
-
-                            moveTables(tableName, eventArgs.details.valueAfter, changedRow); // changedRow.values[0][1] = Column B
-
-                        } else if (['MISSING', 'DIGITAL', 'ZSHELF', 'UA'].includes(eventArgs.details.valueAfter)){
-                            // Move to table that matches Column A.
-                            // Also move to table that matches Column B.
-                            await moveTables(tableName, eventArgs.details.valueAfter, changedRow);
-
-                        }
-                        else if(eventArgs.details.valueAfter == "PRINTED"){
-                            /* 
-                                If you update a form number to "PRINTED", it should update the data in the breakout sheet and also update the data in 
-                                the printed table.
-                            */
-
-                            updateTable(changedRow);
-                            let changedSheet= context.workbook.worksheets.getItem(tableName);
-                            const newWorksheet = context.workbook.worksheets.getItem(eventArgs.details.valueAfter);
-                            const newTable = newWorksheet.tables.getItem(tableAndSheetNames[eventArgs.details.valueAfter]);
-                            // Get the unique identifier from the changedRow (22nd key)
-                            const uniqueIdentifier = changedRow.values[0][21]; // Index 21 corresponds to the 22nd column
-
-                            // Load the rows from the newTable
-                            newTable.rows.load("items");
-                            await context.sync(); // Ensure the rows are loaded
-                            
-
-                            // Check if the unique identifier exists in newTable
-                            let rowExists = newTable.rows.items.some(row => row.values[0][21] === uniqueIdentifier);
-
-                            if (!rowExists) {
-                                console.log("Adding this row to:", tableName)
-                                // If the row does not exist, add it to the newTable
-                                newTable.rows.add(null, [changedRow.values[0]]);
-                                await context.sync(); // Synchronize the changes
-                            }
-                            conditionalFormatting(changedSheet, changedSheet.getRange(`A${rowNum}:W${rowNum}`), changedRow, null);
-
-                        }
-                        else {
-                            // Move to table that matches Column B
-                            // Get value of Column A before change and delete line from this table
-                            updateTable(changedRow);
-                            let prevTable = eventArgs.details.valueBefore == "" ? "MISSING" : eventArgs.details.valueBefore;
-                            const oldWorksheet = context.workbook.worksheets.getItem(prevTable);
-                            const oldTable = oldWorksheet.tables.getItem(tableAndSheetNames[prevTable]);
-                            const oldRows = oldTable.getDataBodyRange().load("values");
-                            await context.sync();
-                            
-                            for (let i = 0; i < oldRows.values.length; i++) {
-                                if (oldRows.values[i][22] == changedRow.values[0][22]) {
-                                    oldTable.rows.getItemAt(i).delete();
-                                break;
-                                }
-                            }
-                        }
-                        await context.sync();
-                    } else if (eventArgs.address.match(/B\d+/g)) {
-
-                        moveTables(eventArgs.details.valueBefore, eventArgs.details.valueAfter, changedRow);
-
-                    } else {
-                        
-                        try {
-                            updateTable(changedRow);
-                        } catch (e) {
-                            console.error(e)
-                        }
-                       
-                    
-
-                    }
-
-                });
-            // #endregion ------------------------------------------------------------------------------------------------------------------------
-            //====================================================================================================================================
-
             });} catch(e){
                 loadError(e.stack)
             }
 
             
         });
+        
 
     //#endregion -------------------------------------------------------------------------------------------------------------------------------------
 
@@ -1181,11 +938,7 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
                                 if (event.details == undefined) {
                                     console.log("Event is undefined");
                                     return;
-                                }
-                                //  else {
-                                //     console.log("The Event is: ");
-                                //     console.log(event);
-                                // };
+                                };
 
                             //#endregion -------------------------------------------------------------------------------------------------------------
                         //============================================================================================================================
@@ -1198,6 +951,15 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
                                 const linesTable = validation.tables.getItem("Lines").load("name");
                                 const customFormsBodyRange = customFormsTable.getDataBodyRange().load("values");
                                 const linesBodyRange = linesTable.getDataBodyRange().load("values");
+
+                                let sheet = context.workbook.worksheets.getActiveWorksheet();
+                                var rowNum = event.address.replace(/\D/g, '');
+                                //var changedRowDeleteMaybe = sheet.getRange(`A${rowNum}:W${rowNum}`).load('values');
+                                // // ---- //
+                                const missingWorksheet = context.workbook.worksheets.getItem("MISSING");
+                                const missingTable = missingWorksheet.tables.getItem("Missing");
+                                const missingRows = missingTable.getDataBodyRange().load("values");
+                                //const masterHeaderRange = missingTable.getHeaderRowRange().load("values");
 
                                 let address = event.address;
                                 let changedWorksheet = context.workbook.worksheets.getItem(event.worksheetId).load("name");
@@ -1240,6 +1002,17 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
                         //============================================================================================================================
 
                         //============================================================================================================================
+                            //#region EXIT FUNCTION IF VALUE IS THE SAME -----------------------------------------------------------------------------
+
+                                if (event.details.valueBefore == event.details.valueAfter) {
+                                    console.log("onTableChange was triggered, but the value was not changed, so doing nothing...");
+                                    return;
+                                };
+                            
+                            //#endregion -------------------------------------------------------------------------------------------------------------
+                        //============================================================================================================================
+
+                        //============================================================================================================================
                             //#region CREATE ROW INFO OBJECT -----------------------------------------------------------------------------------------
 
                                 let changedRowInfo = new Object();
@@ -1247,83 +1020,417 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
                                 //creates an object out of the row's info to use in the code
                                 for (var headName of changedHeadersValues[0]) {
                                     createRowInfo(
-                                        changedHeadersValues, headName, changedRowValues[0], changedTableArrCopy, changedRowInfo, 
+                                        changedHeadersValues, headName, changedRowValues[0], changedTableArrCopy, changedRowInfo,
                                         changedRow.rowIndex, changedWorksheet
                                     );
                                 };
 
                                 globalVar.formsColumnIndex = changedRowInfo.Forms.columnIndex;
-                                // console.log(changedRow.rowIndex + 1); //add one since it is zero-indexed
-                                // console.log(changedRowInfo.Forms.value);
 
                             //#endregion -------------------------------------------------------------------------------------------------------------
                         //============================================================================================================================
 
                         //============================================================================================================================
-                            //#region UPDATE DATA VALIDATION IN FORMS COLUMN -------------------------------------------------------------------------
+                            //#region FOR REFERENCE: THE FIVE AUTO-UPDATE BREAKOUT FUNCTIONS ---------------------------------------------------------
+
+                                //*removes row from breakout table in the Forms column before it was changed
+                                // removeRow(event.details.valueBefore, changedRowInfo); //? DELETE OLD FORM
+
+                                //*removes row from breakout table in the type column
+                                // removeRow(changedRowInfo["Type"].value, changedRowInfo); //? DELETE TYPE
+
+                                //*moves row to breakout table in the Forms column
+                                // moveRow(event.details.valueAfter, changedRowValues, changedRowInfo); //? MOVE TO NEW FORM
+
+                                //*moves row to breakout table in the Type column
+                                // moveRow(changedRowInfo["Type"].value, changedRowValues, changedRowInfo); //? MOVE TO TYPE
+
+                                //*if row exists in type breakout table and/or in any of the form breakout tables, update it to new info/formatting
+                                // updateTable(changedRowValues, changedRowInfo); //? UPDATES TYPE AND FORM TABLES
+
+                            //#endregion -------------------------------------------------------------------------------------------------------------
+                        //============================================================================================================================
+
+                        //============================================================================================================================
+                            //#region WHEN FORMS COLUMN IS UPDATED -----------------------------------------------------------------------------------
 
                                 //if the changed value is in the Forms column, trigger a re-evaluation of the data validation for the changed cell
                                 if (changedRowInfo.Forms.columnIndex == changedColumn.columnIndex) {
 
-                                    changedRange.dataValidation.clear(); //clear out current data validation
+                                //====================================================================================================================
+                                    //#region UPDATE DATA VALIDATION IN FORMS COLUMN -----------------------------------------------------------------
+                                    
+                                        changedRange.dataValidation.clear(); //clear out current data validation
 
-                                    //if updated value in cell is not a number or blank, give it data validation!
-                                    if (!Number(event.details.valueAfter) && event.details.valueAfter !== "") {
-                                        // console.log(masterArr[z][masterFormColumnIndex] + "is not a number!");
+                                        //if updated value in cell is not a number or blank, give it data validation!
+                                        if (!Number(event.details.valueAfter) && event.details.valueAfter !== "") {
+                                            // console.log(masterArr[z][masterFormColumnIndex] + "is not a number!");
+                                            let dv = {
+                                                list: {
+                                                    inCellDropdown: true,
+                                                    source: customFormsBodyRange
+                                                }
+                                            };
+
+                                            changedRange.dataValidation.rule = dv;
+
+                                            //update the conditional formatting of this cell based on the new value
+                                            conditionalFormatting(changedWorksheet, changedRange, changedRowInfo.Forms.value, null);
+
+                                            await context.sync(); //make it a reality within excel
+
+                                            //* Need to clear out changedRowInfo and update it again so that the cellProps reflect the 
+                                            //* post-validation update
+                                            changedRowInfo = {};
+
+                                            //updates changedRowInfo for breakout auto updates
+                                            for (var headName of changedHeadersValues[0]) {
+                                                createRowInfo(
+                                                    changedHeadersValues, headName, changedRowValues[0], changedTableArrCopy, changedRowInfo,
+                                                    changedRow.rowIndex, changedWorksheet
+                                                );
+                                            };
+
+                                            let tableName = changedRowInfo["Type"].value;
+
+                                            await context.sync();
+
+                                        };
+                                    
+                                        //if updated value in cell is a Number or blank, clear out the data validation
+                                        if (Number(event.details.valueAfter) || event.details.valueAfter == "") {
+
+                                            changedRange.dataValidation.clear();
+
+                                            //update the conditional formatting of this cell based on the new value
+                                            conditionalFormatting(changedWorksheet, changedRange, changedRowInfo.Forms.value, null);
+
+                                            console.log("I am a number now (or I am nothing)!");
+
+                                            await context.sync();
+
+                                        };
+
+                                    //#endregion -----------------------------------------------------------------------------------------------------
+                                //====================================================================================================================
+
+                                //====================================================================================================================
+                                    //#region BREAKOUT AUTO UPDATE CONDITIONALS ----------------------------------------------------------------------
+
+                                        //* KEY:
+                                        //* Normal == Form # or blank
+                                        //* Both == MISSING, PRINTED, or DIGITAL (items that update in both form column & type column breakout table)
+                                        //* Update == ZSHELF or UA
+                                        //* Override == IGNORE or APPAREL
+
+                                        //#region //!Normal --> Normal, Normal --> Update, Update --> Normal, Update --> Update ----------------------
+                                            if (
+                                                (
+                                                    (
+                                                        //value before = normal
+                                                        (Number(event.details.valueBefore) || event.details.valueBefore == "") || 
+                                                        ['ZSHELF', 'UA'].includes(event.details.valueBefore) //or value before is ZSHELF or UA
+                                                    )
+                                                    &&
+                                                    (
+                                                        (Number(event.details.valueAfter) || event.details.valueAfter == "") || //value after = normal
+                                                        ['ZSHELF', 'UA'].includes(event.details.valueAfter) //or value after is ZSHELF or UA
+                                                    )
+                                                )
+                                            ) {
+
+                                                console.log(`VALUE BEFORE: ${event.details.valueBefore} - VALUE AFTER: ${event.details.valueAfter}`, 
+                                                `\n\nRESULT: Updates Type & Form Tables`);
+                                            
+                                                //if row exists in type breakout table and/or in any of the form breakout tables, 
+                                                //update it to the new info/formatting
+                                                updateTable(changedRowValues, changedRowInfo); //? UPDATES TYPE AND FORM TABLES
+
+                                            };
+                                        //#endregion -------------------------------------------------------------------------------------------------
+
+        
+                                        //#region //! Normal --> Both, Update --> Both ---------------------------------------------------------------
+                                            if (
+                                                (
+                                                    (Number(event.details.valueBefore) || event.details.valueBefore == "") || //value before = normal
+                                                    ['ZSHELF', 'UA'].includes(event.details.valueBefore) //or value before is ZSHELF or UA
+                                                )  
+                                                &&
+                                                (
+                                                    ['MISSING', 'DIGITAL', 'PRINTED'].includes(event.details.valueAfter) //value after = both
+                                                )
+                                            ) {
+
+                                                console.log(`VALUE BEFORE: ${event.details.valueBefore} - VALUE AFTER: ${event.details.valueAfter}`,
+                                                `\n\nRESULT: Upates Type & Form Tables, Moves to New Form Table`);
+
+
+                                                //if row exists in type breakout table and/or in any of the form breakout tables, 
+                                                //update it to the new info/formatting
+                                                await updateTable(changedRowValues, changedRowInfo); //? UPDATES TYPE AND FORM TABLES
+
+                                                //moves row to breakout table in the Forms column
+                                                await moveRow(event.details.valueAfter, changedRowValues, changedRowInfo); //? MOVE TO NEW FORM
+
+                                            };
+                                        //#endregion -------------------------------------------------------------------------------------------------
+
+
+                                        //#region //! Normal --> Override, Update --> Override -------------------------------------------------------
+                                            if (
+                                                (
+                                                    (Number(event.details.valueBefore) || event.details.valueBefore == "") || //value before = normal
+                                                    ['ZSHELF', 'UA'].includes(event.details.valueBefore) //or value before is ZSHELF or UA
+                                                )  
+                                                &&
+                                                (
+                                                    ['IGNORE', 'APPAREL'].includes(event.details.valueAfter) //value after = override
+                                                )
+                                            ) {
+
+                                                console.log(`VALUE BEFORE: ${event.details.valueBefore} - VALUE AFTER: ${event.details.valueAfter}`,
+                                                `\n\nRESULT: Deletes Row from Type Table, Moves to New Form Table`);
+
+                                                //removes row from breakout table in the type column
+                                                await removeRow(changedRowInfo["Type"].value, changedRowInfo); //? DELETE TYPE
+
+                                                //moves row to breakout table in the Forms column
+                                                await moveRow(event.details.valueAfter, changedRowValues, changedRowInfo); //? MOVE TO NEW FORM
+
+                                            };
+                                        //#endregion -------------------------------------------------------------------------------------------------
+
+
+                                        //#region //! Both --> Normal, Override --> Normal, Override --> Update --------------------------------------
+                                            if (
+                                                (
+                                                    (
+                                                        ['MISSING', 'DIGITAL', 'PRINTED'].includes(event.details.valueBefore) || //value before = both
+                                                        ['IGNORE', 'APPAREL'].includes(event.details.valueBefore) //or value before = override
+                                                    )  
+                                                    &&
+                                                    (
+                                                        (Number(event.details.valueAfter) || event.details.valueAfter == "") //value after = normal
+                                                    )
+                                                ) || (
+                                                    (
+                                                        ['IGNORE', 'APPAREL'].includes(event.details.valueBefore) //value before = override
+                                                    )
+                                                    &&
+                                                    (
+                                                        ['ZSHELF', 'UA'].includes(event.details.valueAfter) //value after is ZSHELF or UA
+                                                    )
+                                                )
+                                            ) {
+
+                                                console.log(`VALUE BEFORE: ${event.details.valueBefore} - VALUE AFTER: ${event.details.valueAfter}`,
+                                                `\n\nRESULT: Deletes Row from Old Form Table, Moves to Type Table`);
+
+                                                //removes row from breakout table in the Forms column before it was changed
+                                                await removeRow(event.details.valueBefore, changedRowInfo); //? DELETE OLD FORM
+
+                                                //moves row to breakout table in the Type column
+                                                await moveRow(changedRowInfo["Type"].value, changedRowValues, changedRowInfo); //? MOVE TO TYPE
+
+                                            };
+                                        //#endregion -------------------------------------------------------------------------------------------------
+
+
+                                        //#region //! Both --> Update --------------------------------------------------------------------------------
+                                            if (
+                                                ['MISSING', 'DIGITAL', 'PRINTED'].includes(event.details.valueBefore) //value before = both
+                                                && 
+                                                ['ZSHELF', 'UA'].includes(event.details.valueAfter) //value after is ZSHELF or UA
+                                            ) {
+
+                                                console.log(`VALUE BEFORE: ${event.details.valueBefore} - VALUE AFTER: ${event.details.valueAfter}`,
+                                                `\n\nRESULT: Deletes Row from Old Form Table, Upates Type & Form Tables`);
+
+                                                //removes row from breakout table in the Forms column before it was changed
+                                                await removeRow(event.details.valueBefore, changedRowInfo); //? DELETE OLD FORM
+
+                                                //if row exists in type breakout table and/or in any of the form breakout tables, 
+                                                //update it to the new info/formatting
+                                                await updateTable(changedRowValues, changedRowInfo); //? UPDATES TYPE AND FORM TABLES
+
+                                            };
+                                        //#endregion -------------------------------------------------------------------------------------------------
+
+
+                                        //#region //! Both --> Override ------------------------------------------------------------------------------
+                                            if (
+                                                ['MISSING', 'DIGITAL', 'PRINTED'].includes(event.details.valueBefore) //value before = both
+                                                && 
+                                                ['IGNORE', 'APPAREL'].includes(event.details.valueAfter) //value after = override
+                                            ) {
+
+                                                console.log(`VALUE BEFORE: ${event.details.valueBefore} - VALUE AFTER: ${event.details.valueAfter}`,
+                                                `\n\nRESULT: Deletes Row from Old Form Table, Deletes Row from Type Table, Moves to New Form Table`);
+
+                                                //removes row from breakout table in the Forms column before it was changed
+                                                await removeRow(event.details.valueBefore, changedRowInfo); //? DELETE OLD FORM
+
+                                                //removes row from breakout table in the type column
+                                                await removeRow(changedRowInfo["Type"].value, changedRowInfo); //? DELETE TYPE
+
+                                                //moves row to breakout table in the Forms column
+                                                await moveRow(event.details.valueAfter, changedRowValues, changedRowInfo); //? MOVE TO NEW FORM
+
+                                            };
+                                        //#endregion -------------------------------------------------------------------------------------------------
+
+
+                                        //#region //! Override --> Override --------------------------------------------------------------------------
+                                            if (
+                                                ['IGNORE', 'APPAREL'].includes(event.details.valueBefore) //value before = override
+                                                && 
+                                                ['IGNORE', 'APPAREL'].includes(event.details.valueAfter) //value after = override
+                                            ) {
+
+                                                console.log(`VALUE BEFORE: ${event.details.valueBefore} - VALUE AFTER: ${event.details.valueAfter}`,
+                                                `\n\nRESULT: Deletes Row from Old Form Table, Moves to New Form Table`);
+
+                                                //removes row from breakout table in the Forms column before it was changed
+                                                await removeRow(event.details.valueBefore, changedRowInfo); //? DELETE OLD FORM
+
+                                                //moves row to breakout table in the Forms column
+                                                await moveRow(event.details.valueAfter, changedRowValues, changedRowInfo); //? MOVE TO NEW FORM
+
+                                            };
+                                        //#endregion -------------------------------------------------------------------------------------------------
+
+
+                                        //#region //! Override --> Both ------------------------------------------------------------------------------
+                                            if (
+                                                ['IGNORE', 'APPAREL'].includes(event.details.valueBefore) //value before = override
+                                                && 
+                                                ['MISSING', 'DIGITAL', 'PRINTED'].includes(event.details.valueAfter) //value after = both
+                                            ) {
+
+                                                console.log(`VALUE BEFORE: ${event.details.valueBefore} - VALUE AFTER: ${event.details.valueAfter}`,
+                                                `\n\nRESULT: Deletes Row from Old Form Table, Moves to New Form Table, Moves to Type Table`);
+
+                                                //removes row from breakout table in the Forms column before it was changed
+                                                await removeRow(event.details.valueBefore, changedRowInfo); //? DELETE OLD FORM
+
+                                                //moves row to breakout table in the Forms column
+                                                await moveRow(event.details.valueAfter, changedRowValues, changedRowInfo); //? MOVE TO NEW FORM
+
+                                                //moves row to breakout table in the Type column
+                                                await moveRow(changedRowInfo["Type"].value, changedRowValues, changedRowInfo); //? MOVE TO TYPE
+
+                                            };
+                                        //#endregion -------------------------------------------------------------------------------------------------
+
+
+                                        //#region //! Both --> Both ----------------------------------------------------------------------------------
+                                            if (
+                                                ['MISSING', 'DIGITAL', 'PRINTED'].includes(event.details.valueBefore) //value before = both
+                                                && 
+                                                ['MISSING', 'DIGITAL', 'PRINTED'].includes(event.details.valueAfter) //value after = both
+                                            ) {
+
+                                                console.log(`VALUE BEFORE: ${event.details.valueBefore} - VALUE AFTER: ${event.details.valueAfter}`,
+                                                `\n\nRESULT: Deletes Row from Old Form Table, Moves to New Form Table, Updates Type & Form Tables`);
+
+                                                //removes row from breakout table in the Forms column before it was changed
+                                                await removeRow(event.details.valueBefore, changedRowInfo); //? DELETE OLD FORM
+
+                                                //moves row to breakout table in the Forms column
+                                                await moveRow(event.details.valueAfter, changedRowValues, changedRowInfo); //? MOVE TO NEW FORM
+
+                                                //if row exists in type breakout table and/or in any of the form breakout tables, 
+                                                //update it to the new info/formatting
+                                                await updateTable(changedRowValues, changedRowInfo); //? UPDATES TYPE AND FORM TABLES
+
+                                            };
+                                        //#endregion -------------------------------------------------------------------------------------------------
+
+
+                                    //#endregion -----------------------------------------------------------------------------------------------------
+                                //====================================================================================================================
+
+                            //#endregion -------------------------------------------------------------------------------------------------------------
+                        //============================================================================================================================
+
+                        //============================================================================================================================
+                            //#region WHEN TYPE COLUMN IS UPDATED ------------------------------------------------------------------------------------
+
+                                //if the changed value is in the Type column, update the data validation in said cell
+                                } else if (changedRowInfo.Type.columnIndex == changedColumn.columnIndex) {
+
+                                //====================================================================================================================
+                                    //#region UPDATE DATA VALIDATION IN TYPE COLUMN ------------------------------------------------------------------
+
+                                        changedRange.dataValidation.clear();
+
                                         let dv = {
                                             list: {
                                                 inCellDropdown: true,
-                                                source: customFormsBodyRange
+                                                source: linesBodyRange
                                             }
                                         };
 
                                         changedRange.dataValidation.rule = dv;
 
-                                        //update the conditional formatting of this cell based on the new value
-                                        conditionalFormatting(changedWorksheet, changedRange, changedRowInfo.Forms.value, null);
+                                        await context.sync();
 
-                                        await context.sync(); //make it a reality within excel
+                                        //* Need to clear out changedRowInfo and update it again so that the cellProps reflect the 
+                                        //* post-validation update
+                                        changedRowInfo = {};
 
-                                    };
+                                        //updates changedRowInfo for breakout auto updates
+                                        for (var headName of changedHeadersValues[0]) {
+                                            createRowInfo(
+                                                changedHeadersValues, headName, changedRowValues[0], changedTableArrCopy, changedRowInfo,
+                                                changedRow.rowIndex, changedWorksheet
+                                            );
+                                        };
 
-                                    //if updated value in cell is a Number or blank, clear out the data validation
-                                    if (Number(event.details.valueAfter) || event.details.valueAfter == "") {
+                                        await context.sync();
 
-                                        changedRange.dataValidation.clear();
+                                    //#endregion -----------------------------------------------------------------------------------------------------
+                                //====================================================================================================================
 
-                                        //update the conditional formatting of this cell based on the new value
-                                        conditionalFormatting(changedWorksheet, changedRange, changedRowInfo.Forms.value, null);
+                                //====================================================================================================================
+                                    //#region BREAKOUT AUTO UPDATE FUNCTIONS -------------------------------------------------------------------------
 
-                                        console.log("I am a number now (or I am nothing)!");
+                                        console.log(`Type Column was Updated, so Deleting Row from Old Type Breakout and Moving Data to New Type Breakout`);
 
-                                    };
+                                        //removes row from breakout table in the type column
+                                        await removeRow(event.details.valueBefore, changedRowInfo); //? DELETE OLD TYPE
 
-                                };
+                                        //moves row to breakout table in the Type column
+                                        await moveRow(changedRowInfo["Type"].value, changedRowValues, changedRowInfo); //? MOVE TO NEW TYPE
+
+                                        // Let's update just in case.
+                                        await updateTable(changedRowValues, changedRowInfo);
+
+                                    //#endregion -----------------------------------------------------------------------------------------------------
+                                //====================================================================================================================
 
                             //#endregion -------------------------------------------------------------------------------------------------------------
                         //============================================================================================================================
 
                         //============================================================================================================================
-                            //#region UPDATE THE DATA VALIDATION IN THE TYPE COLUMN ------------------------------------------------------------------
+                            //#region WHEN ANY OTHER COLUMN IS UPDATED -------------------------------------------------------------------------------
+                                } else {
 
-                                //if the changed value is in the Type column, update the data validation in said cell
-                                if (changedRowInfo.Type.columnIndex == changedColumn.columnIndex) {
+                                    try {
 
-                                    changedRange.dataValidation.clear();
+                                        //just do breakout auto-updating stuff, no need to worry about updating the data validation
+                                        await context.sync();
 
-                                    let dv = {
-                                        list: {
-                                            inCellDropdown: true,
-                                            source: linesBodyRange
-                                        }
-                                    };
+                                        console.log(`Something was changed in another cell other than Forms or Type, so just updating the Type Breakout and Form Breakouts`);
 
-                                    changedRange.dataValidation.rule = dv;
+                                        updateTable(changedRowValues, changedRowInfo); //? UPDATES TYPE AND FORM TABLES
 
-                                    await context.sync();
+                                    } catch (e) {
+                                        console.error(e)
+                                    }
 
-                                };
-
+                                }
                             //#endregion -------------------------------------------------------------------------------------------------------------
                         //============================================================================================================================
 
@@ -1332,6 +1439,162 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
 
             //#endregion -----------------------------------------------------------------------------------------------------------------------------
         //============================================================================================================================================
+
+async function removeRow(valueBefore, rowData) {
+    try {
+        await Excel.run(async (context) => {
+            const oldWorksheet = context.workbook.worksheets.getItem(valueBefore);
+            const oldTable = oldWorksheet.tables.getItem(globalVar.tableAndSheetNames[valueBefore]);
+            const oldRows = oldTable.getDataBodyRange().load("values");
+            var dataHeaderRange = oldTable.getHeaderRowRange().load("values");
+            await context.sync();
+            var ujidColumn= dataHeaderRange.values[0].indexOf("UJID");
+
+            for (let i = 0; i < oldRows.values.length; i++) {
+                if (oldRows.values[i][ujidColumn] == rowData["UJID"].value) {
+                    oldTable.rows.getItemAt(i).delete();
+                    break;
+                }
+            };
+        });
+    } catch (error) {
+        console.error(error);
+    };
+};
+
+
+async function moveRow(newTableName, changedRowValues, rowData) {
+    try {
+        await Excel.run(async (context) => {
+
+            const newWorksheet = context.workbook.worksheets.getItem(newTableName);
+            const newTable = newWorksheet.tables.getItem(globalVar.tableAndSheetNames[newTableName]);
+
+
+            // Add the changed row to the new worksheet
+            newTable.rows.add(null, [changedRowValues[0]]);
+
+            let newRowIndex = newTable.rows.getCount(); //since it adds item to end of table, the row count should be the index of the last row (-1 for 0index)
+
+            await context.sync();
+
+            console.log(`Row moved to ${globalVar.tableAndSheetNames[newTableName]}`);
+
+
+            newRowIndex = newRowIndex.value - 1;
+
+            let thisRow = newTable.rows.getItemAt(newRowIndex).getRange();
+
+            let rowDataArr = Object.keys(rowData).map(key => rowData[key]);
+
+            //console.log(rowDataArr);
+            // Using the headerValues variable because its index will always match the column number.
+            rowDataArr.forEach((cell, i) => {
+                // Take thisRow
+                let unFormatted = thisRow.getCell(0, i).load("address"); // An Unformatted cell.
+                let currentCellProps = cell.cellProps.value[0][0];
+
+                unFormatted.format.fill.color = currentCellProps.format.fill.color;
+                unFormatted.format.font.color = currentCellProps.format.font.color;
+                unFormatted.format.font.bold = currentCellProps.format.font.bold;
+                unFormatted.format.font.italic = currentCellProps.format.font.italic;
+                unFormatted.format.wrapText = true;
+            });
+
+        })
+    } catch (error) {
+        console.error(error);
+    };
+};
+
+
+        
+        async function updateTable(changedRow, rowData) {
+            // let address = event.address;
+            // let changedRange = changedWorksheet.getRange(address);
+            try {
+                await Excel.run(async (context) => {
+                    let tableNamesToUpdate = ["MISSING", "Shipping", "PRINTED", "IGNORE", "DIGITAL"]; /* Just look through these in all 
+                                                                                                         updates just in case. */
+                    //let columnBTableName = changedRow.values[0][1]; // It's ok if it updates twice-- That won't harm anything.
+
+                    let typeName = rowData["Type"].value;
+
+                    // Add the table from column B to the list of tables to update
+                    tableNamesToUpdate.push(typeName);
+                    
+                    for (let name of tableNamesToUpdate) {
+                        try {
+                            let changedProductTable = context.workbook.tables.getItem(globalVar.tableAndSheetNames[name]);
+                            let dataBodyRange = changedProductTable.getDataBodyRange();
+                            let headerRange = changedProductTable.getHeaderRowRange().load("values");
+
+                            await context.sync();
+
+                            var ujidColumn= headerRange.values[0].indexOf("UJID");
+                            
+                            // Queue a command to load the 'values' property for the dataBodyRange
+                            dataBodyRange.load("values");
+                            // Run the queued commands, and return a promise to indicate task completion
+                            await context.sync();
+
+                            let rowIndex = "";
+                            
+                            let newTableData = dataBodyRange.values.map((row, index) => {
+                                if (row[ujidColumn] == rowData["UJID"].value) {
+                                    rowIndex = index;
+                                    return changedRow[0];
+                                }
+                                return row;
+                            });
+                            
+                            // Get the range again to update the values
+                            // Set the values for the range
+                            changedProductTable.getDataBodyRange().values = newTableData;
+
+                            changedProductTable.load("values");
+                            //let cPTRowCount = changedProductTable.rows.getCount();
+
+                    
+                            // Run the queued commands, and return a promise to indicate task completion
+                            await context.sync();
+
+            
+                            if (rowIndex) {
+                                let thisRow = changedProductTable.rows.getItemAt(rowIndex).getRange();
+
+                                let rowDataArr = Object.keys(rowData).map(key => rowData[key]);
+
+                                // Using the headerValues variable because its index will always match the column number.
+                                rowDataArr.forEach((cell, i) => {
+                                    // Take thisRow
+                                    let unFormatted = thisRow.getCell(0, i).load("address"); // An Unformatted cell.
+                                    let currentCellProps = cell.cellProps.value[0][0];
+
+                                    unFormatted.format.fill.color = currentCellProps.format.fill.color;
+                                    unFormatted.format.font.color = currentCellProps.format.font.color;
+                                    unFormatted.format.font.bold = currentCellProps.format.font.bold;
+                                    unFormatted.format.font.italic = currentCellProps.format.font.italic;
+                                    unFormatted.format.wrapText = true;
+                                });
+                            }
+
+                       
+                            
+                        } catch (e) {
+                            console.error(e);
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error(error);
+            }
+
+            // End of Update Table Function
+        }
+
+
+
 
         //============================================================================================================================================
             //#region CLEAR FORMS CONFIRMATION WINDOW ------------------------------------------------------------------------------------------------
