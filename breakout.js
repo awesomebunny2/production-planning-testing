@@ -200,7 +200,9 @@ var showTitle = false;
                                         for (let zeLine of globalVar.linesData) {
                                             //this is a global variable
                                             globalVar.normalBreakoutsFormatting[zeLine] = [];
-                                        };
+                };
+
+                console.log(globalVar.normalBreakoutsFormatting);
 
                                     //#endregion -----------------------------------------------------------------------------------------------------
                                 //====================================================================================================================
@@ -1357,6 +1359,9 @@ function printSettings(sheet) {
                 }
             });
 
+             console.log(globalVar.normalBreakoutsFormatting);
+             console.log(line);
+
             let formattingRows = globalVar.normalBreakoutsFormatting[line];
             
             zRows.forEach(row => {
@@ -1369,13 +1374,23 @@ function printSettings(sheet) {
             })
 
             // Sorting the formattingRows
-            indexes.sort((a, b) => b - a);
+             indexes.sort((a, b) => b - a);
 
-            // Sort formattingRows so that the items at the indexes in the array "indexes" are at the bottom
-            let elementsToMove = indexes.map(index => formattingRows.splice(index, 1)[0]);
-            if (elementsToMove.length > 0) {
-                formattingRows.push(...elementsToMove);
-            }             
+             if (indexes) {
+                 console.log(indexes);
+                 // Sort formattingRows so that the items at the indexes in the array "indexes" are at the bottom
+                 //let elementsToMove = indexes.map(index => formattingRows.splice(index, 1)[0]);
+                 let elementsToMove = indexes.map((index) => {
+                     formattingRows.splice(index, 1)[0];
+                 });
+                 if (elementsToMove.length > 0) {
+                     formattingRows.push(...elementsToMove);
+                 }
+             } else {
+                 console.log("There were no ZHELF items, so skipping the ZSHELF sort step...");
+             };
+
+                  
 
             // Post sort. format.
             // masterRowInfo['UJID'].value
