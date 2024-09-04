@@ -214,6 +214,39 @@ import { breakout, removeBreakoutSheets } from "./breakout.js";
                     //#endregion ---------------------------------------------------------------------------------------------------------------------
                 //====================================================================================================================================
 
+                const workbook = context.workbook;
+                const worksheetNames = ["SilkE2R", "TextE2R", "DIGE2R"]; // Array of worksheet names
+
+                const points = 72; // 72 points in an inch
+                
+                let pageLayoutZoomOptions = {
+                    'horizontalFitToPages': 1,
+                    'verticalFitToPages': 0,
+                };
+
+                const setPageLayout = (worksheet) => {
+                    worksheet.pageLayout.rightMargin = 0;
+                    worksheet.pageLayout.leftMargin = 0;
+                    worksheet.pageLayout.topMargin = 0.5 * points;
+                    worksheet.pageLayout.bottomMargin = 0.25 * points;
+                    worksheet.pageLayout.headerMargin = 0;
+                    worksheet.pageLayout.footerMargin = 0;
+                    worksheet.pageLayout.printGridlines = true;
+                    worksheet.pageLayout.paperSize = "Legal";
+                    worksheet.pageLayout.centerHorizontally = true;
+                    worksheet.pageLayout.centerVertically = false;
+                    worksheet.pageLayout.zoom = pageLayoutZoomOptions;
+                    worksheet.pageLayout.setPrintArea("A:E");
+                    worksheet.pageLayout.setPrintTitleRows("$1:$1");
+                    worksheet.pageLayout.orientation = Excel.PageOrientation.portrait;
+                };
+
+                for (const worksheetName of worksheetNames) {
+                    console.log(`Set the print layout of ${worksheetName}.`)
+                    const worksheet = workbook.worksheets.getItem(worksheetName);
+                    setPageLayout(worksheet);
+                }
+
                 //====================================================================================================================================
                     // #region UPDATE BREAKOUT BUTTON TEXT -------------------------------------------------------------------------------------------
 

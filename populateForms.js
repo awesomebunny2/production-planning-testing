@@ -426,6 +426,8 @@ import { breakout } from "./breakout.js";
 
                                                 let masterQuantity = masterRowInfo["Qty"].value;
 
+                                                let masterNotes = masterRowInfo["Notes"].value;
+
                                             //#endregion ---------------------------------------------------------------------------------------------
                                         //============================================================================================================
 
@@ -538,7 +540,7 @@ import { breakout } from "./breakout.js";
 
                                                         //if master sheet Version column for the current row has UA- in it, 
                                                         //overwrite the form number with "UA"
-                                                        } else if (masterVersion.includes("UA-")) {
+                                                        } else if (masterVersion.includes("UA-") || masterNotes.includes("UA-")) {
 
                                                             globalVar.formToCarry = "UA";
 

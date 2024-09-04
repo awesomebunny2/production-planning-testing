@@ -486,8 +486,8 @@ var showTitle = false;
 
                                                         } else if (masterForms == "APPAREL") {
 
-                                                            filteredData['Apparel'].push(masterRow);
-                                                            globalVar.normalBreakoutsFormatting['Apparel'].push(formsObjCopy);
+                                                            filteredData['APPAREL'].push(masterRow);
+                                                            globalVar.normalBreakoutsFormatting['APPAREL'].push(formsObjCopy);
 
                                                     //#endregion -------------------------------------------------------------------------------------
                                                 //====================================================================================================
@@ -500,6 +500,14 @@ var showTitle = false;
                                                             filteredData[masterType].push(masterRow);
                                                             globalVar.normalBreakoutsFormatting[masterType].push(formsObjCopy);
                                                             // normalFormatting.push(formsObjCopy);
+
+                                                            // If Heidelberg, go to shipping too.
+                                                            if (masterType== "Heidelberg Die-Cutter"){
+                                                                shipping.push(masterRow);
+                                                                shippingFormatting.push(formsObjCopy);
+
+                                                                missingData["Shipping"].push(masterRow);
+                                                            }
                                                         };
 
                                                     //#endregion -------------------------------------------------------------------------------------
@@ -675,9 +683,9 @@ var showTitle = false;
                                             digitalTable.table, digitalFormatting, digitalRowCount.value, masterHeader, "DIGITAL", digitalSortedTableData
                                         );
 
-                                        context.workbook.tables.getItem("Digital").sort.apply([
-                                            { key: 0, ascending: true } // '0' is the column number for 'Form'
-                                        ]);
+                                        // context.workbook.tables.getItem("Digital").sort.apply([
+                                        //     { key: 0, ascending: true } // '0' is the column number for 'Form'
+                                        // ]);
                                         
                                         /* let theShippingFormat = styleCells(
                                             shippingTable.table, shippingFormatting, shippingRowCount.value, masterHeader, "Shipping"
@@ -718,7 +726,6 @@ var showTitle = false;
                        
 
                         await context.sync();
-
 
                         //============================================================================================================================
                             //#region CREATE & FORMAT THE NORMAL TYPE BREAKOUTS ----------------------------------------------------------------------
@@ -822,11 +829,12 @@ var showTitle = false;
                                                             masterHeader, tableName, sortedTableData
                                                         );
 
-                                                        if (tableName.match(/\bDIGITAL\b/gi)){
-                                                            context.workbook.tables.getItem("Digital").sort.apply([
-                                                                { key: 0, ascending: true } // '0' is the column number for 'Form'
-                                                            ]);
-                                                        } else if (tableName== "Fold Only"){
+                                                        // if (tableName.match(/\bDIGITAL\b/gi)){
+                                                        //     context.workbook.tables.getItem("Digital").sort.apply([
+                                                        //         { key: 0, ascending: true } // '0' is the column number for 'Form'
+                                                        //     ]);
+                                                        // } else 
+                                                        if (tableName== "Fold Only"){
                                                             context.workbook.tables.getItem("FoldOnly").sort.apply([
                                                                 { key: 5, ascending: true }, // '5' is the column number for 'product'
                                                                 { key: 6, ascending: true },  // '6' is the column number for 'company'
@@ -924,9 +932,9 @@ var showTitle = false;
                                                 shippingTable.table, shippingFormatting, shippingRowCount.value, masterHeader, "Shipping", shippingSortedTableData
                                             );
 
-                                            context.workbook.tables.getItem("Shipping").sort.apply([
-                                                { key: 0, ascending: true } // '0' is the column number for 'Form'
-                                            ]);
+                                            // context.workbook.tables.getItem("Shipping").sort.apply([
+                                            //     { key: 0, ascending: true } // '0' is the column number for 'Form'
+                                            // ]);
                                         
 
                                     //#endregion -----------------------------------------------------------------------------------------------------
@@ -1181,8 +1189,9 @@ function printSettings(sheet) {
     sheet.pageLayout.bottomMargin = 0.25 * points;
     sheet.pageLayout.headerMargin = 0;
     sheet.pageLayout.footerMargin = 0;
-
+    sheet.pageLayout.printGridlines= true;
     sheet.pageLayout.paperSize = "Legal";
+
 
     sheet.pageLayout.centerHorizontally = true;
     sheet.pageLayout.centerVertically = false;
@@ -1199,7 +1208,7 @@ function printSettings(sheet) {
 
     sheet.pageLayout.orientation = Excel.PageOrientation.landscape;
 
-    sheet.pageLayout.printGridlines= true;
+    
 }
 
     //#endregion -------------------------------------------------------------------------------------------------------------------------------------
@@ -1325,30 +1334,22 @@ function printSettings(sheet) {
                 currentSheet.splice(currentSheet.indexOf(row), 1)
 
                 let versionRef = row[masterHeader[0].indexOf("Version No")].split("-")[1];
-                let notesRef = row[masterHeader[0].indexOf("Notes")].split("-")[1];
-                let codeColumn = row[masterHeader[0].indexOf("Code")];
+                let notesRef = row[masterHeader[0].indexOf("Notes")].split("-")[2];
+                let codeColumn = masterHeader[0].indexOf("Code");
 
 
-                // Find the row in currentSheet that has the ref value as the 3rd index
-                let refRow = currentSheet.find(row => (row[codeColumn] === Number(versionRef) || row[codeColumn] === Number(notesRef)))
-                let targetIndex = currentSheet.indexOf(refRow)
+                let refRow = currentSheet.find(row => {
+                    let codeValue = row[codeColumn];
+                
+                    return (codeValue === Number(versionRef) || codeValue.toString().includes(notesRef.toString()));
+                });
+
+                let targetIndex = currentSheet.indexOf(refRow);
                 // Add this row after the row at the target index
-                currentSheet.splice(targetIndex + 1, 0, row)
-
-            })
-
+                currentSheet.splice(targetIndex + 1, 0, row);
+            });
             //adds the line info from filteredData as rows to the end of the table
             table.rows.add(null /*add rows t o the end of the table*/, currentSheet);
-
-            // Type (B), EDDM (P), Order Status (Q), Version No (S), Artwork (T), Options (U), & UJID (W)
-            // const columnsToHide = ['B', 'P', 'Q', 'S', 'T', 'U', 'W'];
-            // columnsToHide.forEach(column => {
-            //     const hideRange = sheet.getRange(`${column}:${column}`);
-            //     hideRange.columnHidden = true;
-            // });            
-
-             // Have Digital and Shipping Breakouts sorted by Form numbers. For Fold Only Breakout, sort by product, then by company
-             
 
             // Move Z-shelf to the bottom.
             let indexes = []
@@ -1364,39 +1365,26 @@ function printSettings(sheet) {
 
             let formattingRows = globalVar.normalBreakoutsFormatting[line];
             
+            
             zRows.forEach(row => {
 
                 // Remove this row from currentSheet
                 currentSheet.splice(currentSheet.indexOf(row), 1)
 
                 // Add to the end.
-                currentSheet.push(row)
+                currentSheet.unshift(row)
             })
 
             // Sorting the formattingRows
              indexes.sort((a, b) => b - a);
 
-             if (indexes) {
-                 console.log(indexes);
-                 // Sort formattingRows so that the items at the indexes in the array "indexes" are at the bottom
-                 //let elementsToMove = indexes.map(index => formattingRows.splice(index, 1)[0]);
-                 let elementsToMove = indexes.map((index) => {
-                     formattingRows.splice(index, 1)[0];
-                 });
-                 if (elementsToMove.length > 0) {
-                     formattingRows.push(...elementsToMove);
-                 }
-             } else {
-                 console.log("There were no ZHELF items, so skipping the ZSHELF sort step...");
-             };
-
-                  
+            // Sort formattingRows so that the items at the indexes in the array "indexes" are at the bottom
+            let elementsToMove = indexes.map(index => formattingRows.splice(index, 1)[0]);
+            if (elementsToMove.length > 0) {
+                formattingRows.unshift(...elementsToMove);
+            }             
 
             // Post sort. format.
-            // masterRowInfo['UJID'].value
-
-
-
             sheet.activate();
 
             //push the sheet and table values to the sheetAndTable object for referencing later

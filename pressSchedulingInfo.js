@@ -73,6 +73,10 @@ import { buildTabulatorTables, organizeData } from "./tabulatorTables.js";
 
             await Excel.run(async (context) => {
 
+                const currentSheet = context.workbook.worksheets.getActiveWorksheet();
+                currentSheet.pageLayout.printGridlines= true;
+                // console.log("...?")
+
                 //====================================================================================================================================
                     //#region ASSIGN SHEET VARIABLES -------------------------------------------------------------------------------------------------
 
@@ -409,6 +413,8 @@ import { buildTabulatorTables, organizeData } from "./tabulatorTables.js";
                 //====================================================================================================================================
 
                 await context.sync();
+
+                
 
                 //====================================================================================================================================
                     //#region LOAD SHEET VARIABLES ---------------------------------------------------------------------------------------------------

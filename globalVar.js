@@ -61,8 +61,8 @@
         "Heidelberg Die-Cutter": "HeidelbergDiecutter",
         "Flatbed Die-Cutter": "FlatbedDiecutter",
         "MF Ink Line": "MfInkLine",
-        "Apparel": "Apparel",
-        "APPAREL": "Apparel", // For the Forms thing.
+        "Apparel": "APPAREL",
+        "APPAREL": "APPAREL", // For the Forms thing.
         "All Other": "AllOther",
         "Shipping": "Shipping"
     }
