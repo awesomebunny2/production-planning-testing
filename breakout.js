@@ -1327,26 +1327,51 @@ function printSettings(sheet) {
             // MA/UA Sort ----------------------------------------------------------------------------------------------------------------------------
             let uaRows = currentSheet.filter(row => row[0]=="UA");
 
-
+            
             uaRows.forEach(row => {
+               /* try{*/
 
-                // Remove this row from currentSheet
-                currentSheet.splice(currentSheet.indexOf(row), 1)
-
+                let notesRef;
                 let versionRef = row[masterHeader[0].indexOf("Version No")].split("-")[1];
-                let notesRef = row[masterHeader[0].indexOf("Notes")].split("-")[2];
+                let notesRef1= row[masterHeader[0].indexOf("Notes")].split("-")[1];
+                let notesRef2 = row[masterHeader[0].indexOf("Notes")].split("-")[2];
                 let codeColumn = masterHeader[0].indexOf("Code");
 
+                //console.log(`notesRef1: ${notesRef1}`);
+                //console.log(`notesRef2: ${notesRef2}`);
 
-                let refRow = currentSheet.find(row => {
-                    let codeValue = row[codeColumn];
+                if (!notesRef1 && !notesRef2) {
+                    console.log(`The row with the UJID of ${row[masterHeader[0].indexOf("UJID")]} has "UA" in the notes, but it is in the improper format, so it will not be sorted properly in the breakouts.
+                    This is what is current shown in the Notes column: ${row[masterHeader[0].indexOf("Notes")]}`);
+                } else {
+                    // Remove this row from currentSheet
+                    currentSheet.splice(currentSheet.indexOf(row), 1);
+
+                    if (notesRef2 == undefined) {
+                        notesRef = notesRef1;
+                    } else {
+                        notesRef = notesRef2;
+                    }
+
+                    let refRow = currentSheet.find(row => {
+                        let codeValue = row[codeColumn];
+
+                        return (codeValue === Number(versionRef) || codeValue.toString().includes(notesRef.toString()));
+                    });
+
+                    let targetIndex = currentSheet.indexOf(refRow);
+                    // Add this row after the row at the target index
+                    currentSheet.splice(targetIndex + 1, 0, row); 
+                };
+
+
+               
+
+
+                //} catch (e){
+                //    console.error(e)
+                //}
                 
-                    return (codeValue === Number(versionRef) || codeValue.toString().includes(notesRef.toString()));
-                });
-
-                let targetIndex = currentSheet.indexOf(refRow);
-                // Add this row after the row at the target index
-                currentSheet.splice(targetIndex + 1, 0, row);
             });
             //adds the line info from filteredData as rows to the end of the table
             table.rows.add(null /*add rows t o the end of the table*/, currentSheet);
