@@ -1314,7 +1314,7 @@ function printSettings(sheet) {
             rangeA_E.format.horizontalAlignment = "Center";
             rangeJ_Q.format.horizontalAlignment = "Center";
 
-            sheet.getRange(`A:W`).format.verticalAlignment="center";
+            sheet.getRange(`A:${tableColumnLetter}`).format.verticalAlignment="center";
 
             //if the table data for the line is empty, push the empty sheet and table variables to the sheetAndTable object for referencing later
             if (currentSheet == "") {
@@ -1328,30 +1328,39 @@ function printSettings(sheet) {
             let uaRows = currentSheet.filter(row => row[0]=="UA");
 
             
-            uaRows.forEach(row => {
-               /* try{*/
+            uaRows.forEach(row => {         
 
-                let notesRef;
-                let versionRef = row[masterHeader[0].indexOf("Version No")].split("-")[1];
-                let notesRef1= row[masterHeader[0].indexOf("Notes")].split("-")[1];
-                let notesRef2 = row[masterHeader[0].indexOf("Notes")].split("-")[2];
+                //this finds just the "UA-12345" in a string of text. For a more detailed description, paste it into chatGPT for explanation
+                let uaRegex = /UA[-\s]*\d{4,}/gi;
+
+                //takes just the "UA-code" from the Version No column and returns it in an array by itself ['UA-12345']. [0] grabs this lone
+                //item then we match it with another regex expression to isolate just the digits, which is returned in an array as well ['12345']
+                //[0] grabs this lone item as well
+                let versionRef = row[masterHeader[0].indexOf("Version No")];
+                if (versionRef) {
+                    versionRef = versionRef.match(uaRegex)[0].match(/\d+/g)[0];
+                };
+                let notesRef = row[masterHeader[0].indexOf("Notes")];
+                if (notesRef) {
+                    notesRef = notesRef.match(uaRegex)[0].match(/\d+/g)[0]; //same as Version No but with Notes
+                };
                 let codeColumn = masterHeader[0].indexOf("Code");
 
-                //console.log(`notesRef1: ${notesRef1}`);
-                //console.log(`notesRef2: ${notesRef2}`);
-
-                if (!notesRef1 && !notesRef2) {
-                    console.log(`The row with the UJID of ${row[masterHeader[0].indexOf("UJID")]} has "UA" in the notes, but it is in the improper format, so it will not be sorted properly in the breakouts.
-                    This is what is current shown in the Notes column: ${row[masterHeader[0].indexOf("Notes")]}`);
+                if (!notesRef && !versionRef) {
+                    console.log(`The row with the UJID of ${row[masterHeader[0].indexOf("UJID")]} is having problems with the MA/UA sorting function.
+                    This is what is currently shown in the Notes column: ${row[masterHeader[0].indexOf("Notes")]}
+                    And this is what is currently shown in the Version No column: ${row[masterHeader[0].indexOf("Version No")]}`);
                 } else {
+
+                    if (versionRef && notesRef) {
+                        console.log(`MA/UA SORTING - Original Version No: ${row[masterHeader[0].indexOf("Version No")]} - Version No UA Code: ${versionRef} - Original Notes: ${row[masterHeader[0].indexOf("Notes")]} - Notes UA Code: ${notesRef}`);
+                    } else if (versionRef) {
+                        console.log(`MA/UA SORTING - Original: ${row[masterHeader[0].indexOf("Version No")]} - UA Code: ${versionRef}`);
+                    } else if (notesRef) {
+                        console.log(`MA/UA SORTING - Original: ${row[masterHeader[0].indexOf("Notes")]} - UA Code: ${notesRef}`);
+                    };
                     // Remove this row from currentSheet
                     currentSheet.splice(currentSheet.indexOf(row), 1);
-
-                    if (notesRef2 == undefined) {
-                        notesRef = notesRef1;
-                    } else {
-                        notesRef = notesRef2;
-                    }
 
                     let refRow = currentSheet.find(row => {
                         let codeValue = row[codeColumn];
@@ -1363,14 +1372,6 @@ function printSettings(sheet) {
                     // Add this row after the row at the target index
                     currentSheet.splice(targetIndex + 1, 0, row); 
                 };
-
-
-               
-
-
-                //} catch (e){
-                //    console.error(e)
-                //}
                 
             });
             //adds the line info from filteredData as rows to the end of the table
@@ -1385,8 +1386,8 @@ function printSettings(sheet) {
                 }
             });
 
-             console.log(globalVar.normalBreakoutsFormatting);
-             console.log(line);
+            //  console.log(globalVar.normalBreakoutsFormatting);
+            //  console.log(line);
 
             let formattingRows = globalVar.normalBreakoutsFormatting[line];
             
@@ -1428,34 +1429,20 @@ function printSettings(sheet) {
 
         /**
          * Converts the provided column index number to it's appropriate column letter
-         * @param {Number} number The column index that you are trying to convert to a column letter
+         * @param {Number} index The column index that you are trying to convert to a column letter
          * @returns String
          */
-        function printToLetter(number) {
+        function printToLetter(index) {
+            index -= 1;
+            const alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+        let letter = "";
 
-            let alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        while (index >= 0) {
+            letter = alphabet[index % 26] + letter;
+            index = Math.floor(index / 26) - 1;
+        }
 
-            let charIndex = number % alphabet.length;
-            let quotient = number / alphabet.length;
-
-            if (charIndex - 1 == -1) {
-
-                charIndex = alphabet.length;
-                quotient--;
-
-            };
-
-            globalVar.result = alphabet.charAt(charIndex - 1); // + globalVar.result;
-
-            if (quotient >= 1) {
-
-                printToLetter(parseInt(quotient));
-
-            } else {
-
-                return globalVar.result;
-
-            };
+        return letter;
 
         };
 
